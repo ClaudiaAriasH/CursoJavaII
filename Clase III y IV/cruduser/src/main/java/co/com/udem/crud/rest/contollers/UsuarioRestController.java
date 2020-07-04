@@ -32,7 +32,7 @@ public class UsuarioRestController {
 			usuario = convertUsuario.convertToEntity(usuarioDTO);
 			usuarioRepository.save(usuario);
 		} catch (ParseException e) {
-			System.err.println("Error convirtiendo a entity: " + e.getMessage() + e.getCause());
+			System.err.println("Error convirtiendo la DTO en entity: " + e.getMessage() + e.getCause());
 		}
 
 		return ResponseEntity.ok("Registro guardado de forma exitosa");
@@ -40,7 +40,9 @@ public class UsuarioRestController {
 
 	@GetMapping("/usuarios")
 	public Iterable<Usuario> listarUsuarios() {
-		return usuarioRepository.findAll();
+		UsuarioDTO usuarioDTO = new UsuarioDTO();
+		Iterable<Usuario> usuario = usuarioRepository.findAll();
+		return usuario;
 	}
 
 	@DeleteMapping("/usuarios/{id}")
@@ -50,13 +52,21 @@ public class UsuarioRestController {
 	}
 
 	@GetMapping("/usuarios/{id}")
-	public Usuario buscarUsuario(@PathVariable Long id) {
-		return usuarioRepository.findById(id).get();
+	public UsuarioDTO buscarUsuario(@PathVariable Long id) {
+		UsuarioDTO usuarioDTO = new UsuarioDTO();
+
+		try {
+			Usuario usuario = usuarioRepository.findById(id).get();
+			usuarioDTO = convertUsuario.convertToDTO(usuario);
+		} catch (ParseException e) {
+			System.err.println("Error convirtiendo a entity a DTO: " + e.getMessage() + e.getCause());
+		}
+		return usuarioDTO;
 	}
 
 	@PutMapping("/users/{id}")
 	public ResponseEntity<Object> updateUser(@RequestBody Usuario newUser, @PathVariable Long id) {
-		if (usuarioRepository.findById(id).isPresent()) {
+		if (usuarioRepository.findById(--id).isPresent()) {
 			Usuario user = usuarioRepository.findById(id).get();
 			user.setFirsName(newUser.getFirsName());
 			user.setLastName(newUser.getLastName());
