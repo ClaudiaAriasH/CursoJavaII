@@ -19,7 +19,7 @@ public class TipoIdentificacion {
 
 	}
 
-	public TipoIdentificacion(Long id, String tipoDocumento, String descripcion, RegistrarUsuario registrarUsuario) {
+	public TipoIdentificacion(Long id, String tipoDocumento, String descripcion) {
 		super();
 		this.id = id;
 		this.tipoDocumento = tipoDocumento;

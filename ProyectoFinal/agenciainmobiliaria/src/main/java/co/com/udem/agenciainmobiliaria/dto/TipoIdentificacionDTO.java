@@ -1,7 +1,5 @@
 package co.com.udem.agenciainmobiliaria.dto;
 
-import co.com.udem.agenciainmobiliaria.entities.RegistrarUsuario;
-
 public class TipoIdentificacionDTO {
 
 	private Long id;
@@ -13,7 +11,7 @@ public class TipoIdentificacionDTO {
 
 	}
 
-	public TipoIdentificacionDTO(Long id, String tipoDocumento, String descripcion, RegistrarUsuario registrarUsuario) {
+	public TipoIdentificacionDTO(Long id, String tipoDocumento, String descripcion) {
 		super();
 		this.id = id;
 		this.tipoDocumento = tipoDocumento;

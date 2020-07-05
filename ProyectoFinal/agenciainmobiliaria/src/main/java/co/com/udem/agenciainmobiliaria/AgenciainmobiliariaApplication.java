@@ -21,7 +21,7 @@ public class AgenciainmobiliariaApplication {
 	}
 
 	@Bean
-	public ConvertTipoIdentificacion convertTipoIdentificación() {
+	public ConvertTipoIdentificacion convertTipoIdentificacion() {
 		return new ConvertTipoIdentificacion();
 	}
 

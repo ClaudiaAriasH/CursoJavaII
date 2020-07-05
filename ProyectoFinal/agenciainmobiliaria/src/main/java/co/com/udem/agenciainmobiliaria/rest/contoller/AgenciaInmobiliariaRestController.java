@@ -4,6 +4,8 @@ import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -26,7 +28,7 @@ import co.com.udem.agenciainmobiliaria.util.ConvertTipoIdentificacion;
 
 @RestController
 public class AgenciaInmobiliariaRestController {
-
+	private static final Logger logger = LogManager.getLogger(AgenciaInmobiliariaRestController.class);
 	@Autowired
 	private RegistrarUsuarioRepository registrarUsuarioRepository;
 	@Autowired
@@ -44,11 +46,11 @@ public class AgenciaInmobiliariaRestController {
 			TipoIdentificacion tipoIdentificacion = convertTipoIdentificacion.convertToEntity(tipoIdentificacionDTO);
 			tipoIdentificacionRepository.save(tipoIdentificacion);
 			response.put(Constantes.CODIGO_HTTP, "200");
-			response.put(Constantes.MENSAJE_EXITO, "Registrado insertado exitosamente");
+			response.put(Constantes.MENSAJE_EXITO, "Se insertado el Tipo de Documento  exitosamente");
 			return response;
 		} catch (ParseException e) {
 			response.put(Constantes.CODIGO_HTTP, "500");
-			response.put(Constantes.MENSAJE_ERROR, "Ocurrió un problema al insertar");
+			response.put(Constantes.MENSAJE_ERROR, "Fallo al adicionar el Tipo de Documento");
 			return response;
 		}
 
@@ -57,8 +59,7 @@ public class AgenciaInmobiliariaRestController {
 	@GetMapping("/tiposDocumentos")
 	public Iterable<TipoIdentificacion> listarTiposDocumentos() {
 
-		Iterable<TipoIdentificacion> tipoIdentificacion = tipoIdentificacionRepository.findAll();
-		return tipoIdentificacion;
+		return tipoIdentificacionRepository.findAll();
 	}
 
 	@DeleteMapping("/tiposDocumentos/{id}")
@@ -76,28 +77,36 @@ public class AgenciaInmobiliariaRestController {
 			TipoIdentificacion tipoIdentificacion = tipoIdentificacionRepository.findById(id).get();
 			tipoIdentificacionDTO = convertTipoIdentificacion.convertToDTO(tipoIdentificacion);
 		} catch (ParseException e) {
-			System.err.println("Error convirtiendo a entity a DTO: " + e.getMessage() + e.getCause());
+			logger.error("Error convirtiendo a entity a DTO");
 		}
 		return tipoIdentificacionDTO;
 	}
 
 	@PutMapping("/tiposDocumentos/{id}")
-	public Map<String, String> updateTipoDocumento(@RequestBody TipoIdentificacion newTipoDoc, @PathVariable Long id) {
+	public Map<String, String> updateTipoDocumento(@RequestBody TipoIdentificacionDTO newTipoDocDTO,
+			@PathVariable Long id) {
 		Map<String, String> response = new HashMap<>();
-		boolean dato = tipoIdentificacionRepository.findById(id).isPresent();
-		System.err.println("Error Actualizando" + dato);
-		if (tipoIdentificacionRepository.findById(id).isPresent()) {
-			TipoIdentificacion tipoDoc = tipoIdentificacionRepository.findById(id).get();
+		try {
+			if (tipoIdentificacionRepository.findById(id).isPresent()) {
 
-			tipoDoc.setTipoDocumento(newTipoDoc.getTipoDocumento());
-			tipoDoc.setDescripcion(newTipoDoc.getDescripcion());
-			tipoIdentificacionRepository.save(tipoDoc);
-			response.put(Constantes.CODIGO_HTTP, "200");
-			response.put(Constantes.MENSAJE_EXITO, "Registro actualizado exitosamente");
+				TipoIdentificacion newTipoDoc = convertTipoIdentificacion.convertToEntity(newTipoDocDTO);
+
+				TipoIdentificacion tipoDoc = tipoIdentificacionRepository.findById(id).get();
+
+				tipoDoc.setTipoDocumento(newTipoDoc.getTipoDocumento());
+				tipoDoc.setDescripcion(newTipoDoc.getDescripcion());
+				tipoIdentificacionRepository.save(tipoDoc);
+				response.put(Constantes.CODIGO_HTTP, "200");
+				response.put(Constantes.MENSAJE_EXITO, "Se actualizo el Tipo de Documento exitosamente");
+				return response;
+			}
+
+		} catch (ParseException e) {
+			response.put(Constantes.CODIGO_HTTP, "500");
+			response.put(Constantes.MENSAJE_ERROR, "Fallo al realizar la actualización del Tipo de Documento");
 			return response;
+
 		}
-		response.put(Constantes.CODIGO_HTTP, "500");
-		response.put(Constantes.MENSAJE_ERROR, "Ocurrió un problema al actualizar el registro");
 		return response;
 
 	}
@@ -122,8 +131,7 @@ public class AgenciaInmobiliariaRestController {
 	@GetMapping("/usuarios")
 	public Iterable<RegistrarUsuario> listarUsuarios() {
 
-		Iterable<RegistrarUsuario> registrarUsuario = registrarUsuarioRepository.findAll();
-		return registrarUsuario;
+		return registrarUsuarioRepository.findAll();
 	}
 
 	@DeleteMapping("/usuarios/{id}")
@@ -141,33 +149,40 @@ public class AgenciaInmobiliariaRestController {
 			RegistrarUsuario usuario = registrarUsuarioRepository.findById(id).get();
 			registrarUsuarioDTO = convertRegistrarUsuario.convertToDTO(usuario);
 		} catch (ParseException e) {
-			System.err.println("Error convirtiendo a entity a DTO: " + e.getMessage() + e.getCause());
+
+			logger.error("Error convirtiendo a entity a DTO");
 		}
 		return registrarUsuarioDTO;
 	}
 
 	@PutMapping("/usuarios/{id}")
-	public Map<String, String> updateUser(@RequestBody RegistrarUsuario newUser, @PathVariable Long id) {
+	public Map<String, String> updateUser(@RequestBody RegistrarUsuarioDTO newUserDTO, @PathVariable Long id) {
 		Map<String, String> response = new HashMap<>();
-		boolean dato = registrarUsuarioRepository.findById(id).isPresent();
-		System.err.println("Error Actualizando" + dato);
-		if (registrarUsuarioRepository.findById(id).isPresent()) {
-			RegistrarUsuario user = registrarUsuarioRepository.findById(id).get();
-			user.setApellidos(newUser.getApellidos());
-			user.setNombres(newUser.getNombres());
-			user.setDireccion(newUser.getDireccion());
-			user.setEmail(newUser.getEmail());
-			user.setNumeroIdentificacion(newUser.getNumeroIdentificacion());
-			user.setTipoIdentificacion(newUser.getTipoIdentificacion());
-			user.setPassword(newUser.getPassword());
-			user.setTelefono(newUser.getTelefono());
-			registrarUsuarioRepository.save(user);
-			response.put(Constantes.CODIGO_HTTP, "200");
-			response.put(Constantes.MENSAJE_EXITO, "Registro actualizado exitosamente");
+		try {
+
+			if (registrarUsuarioRepository.findById(id).isPresent()) {
+				RegistrarUsuario newUser = convertRegistrarUsuario.convertToEntity(newUserDTO);
+				RegistrarUsuario user = registrarUsuarioRepository.findById(id).get();
+				user.setApellidos(newUser.getApellidos());
+				user.setNombres(newUser.getNombres());
+				user.setDireccion(newUser.getDireccion());
+				user.setEmail(newUser.getEmail());
+				user.setNumeroIdentificacion(newUser.getNumeroIdentificacion());
+				user.setTipoIdentificacion(newUser.getTipoIdentificacion());
+				user.setPassword(newUser.getPassword());
+				user.setTelefono(newUser.getTelefono());
+				registrarUsuarioRepository.save(user);
+				response.put(Constantes.CODIGO_HTTP, "200");
+				response.put(Constantes.MENSAJE_EXITO, "Se actualizo el Usuario exitosamente");
+				return response;
+			}
+
+		} catch (ParseException e) {
+			response.put(Constantes.CODIGO_HTTP, "500");
+			response.put(Constantes.MENSAJE_ERROR, "Fallo al realizar la actualización del Usuario");
 			return response;
+
 		}
-		response.put(Constantes.CODIGO_HTTP, "500");
-		response.put(Constantes.MENSAJE_ERROR, "Ocurrió un problema al actualizar el registro");
 		return response;
 
 	}
