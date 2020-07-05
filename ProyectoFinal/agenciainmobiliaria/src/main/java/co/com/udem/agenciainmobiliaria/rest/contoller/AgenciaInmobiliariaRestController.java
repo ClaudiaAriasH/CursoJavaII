@@ -15,10 +15,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import co.com.udem.agenciainmobiliaria.dto.RegistrarUsuarioDTO;
+import co.com.udem.agenciainmobiliaria.dto.TipoIdentificacionDTO;
 import co.com.udem.agenciainmobiliaria.entities.RegistrarUsuario;
+import co.com.udem.agenciainmobiliaria.entities.TipoIdentificacion;
 import co.com.udem.agenciainmobiliaria.repositories.RegistrarUsuarioRepository;
+import co.com.udem.agenciainmobiliaria.repositories.TipoIdentificacionRepository;
 import co.com.udem.agenciainmobiliaria.util.Constantes;
 import co.com.udem.agenciainmobiliaria.util.ConvertRegistrarUsuario;
+import co.com.udem.agenciainmobiliaria.util.ConvertTipoIdentificacion;
 
 @RestController
 public class AgenciaInmobiliariaRestController {
@@ -27,6 +31,76 @@ public class AgenciaInmobiliariaRestController {
 	private RegistrarUsuarioRepository registrarUsuarioRepository;
 	@Autowired
 	private ConvertRegistrarUsuario convertRegistrarUsuario;
+
+	@Autowired
+	private TipoIdentificacionRepository tipoIdentificacionRepository;
+	@Autowired
+	private ConvertTipoIdentificacion convertTipoIdentificacion;
+
+	@PostMapping("/agenciaInmobiliaria/adicionarTipoDocumento")
+	public Map<String, String> adicionarTipoDocumento(@RequestBody TipoIdentificacionDTO tipoIdentificacionDTO) {
+		Map<String, String> response = new HashMap<>();
+		try {
+			TipoIdentificacion tipoIdentificacion = convertTipoIdentificacion.convertToEntity(tipoIdentificacionDTO);
+			tipoIdentificacionRepository.save(tipoIdentificacion);
+			response.put(Constantes.CODIGO_HTTP, "200");
+			response.put(Constantes.MENSAJE_EXITO, "Registrado insertado exitosamente");
+			return response;
+		} catch (ParseException e) {
+			response.put(Constantes.CODIGO_HTTP, "500");
+			response.put(Constantes.MENSAJE_ERROR, "Ocurrió un problema al insertar");
+			return response;
+		}
+
+	}
+
+	@GetMapping("/tiposDocumentos")
+	public Iterable<TipoIdentificacion> listarTiposDocumentos() {
+
+		Iterable<TipoIdentificacion> tipoIdentificacion = tipoIdentificacionRepository.findAll();
+		return tipoIdentificacion;
+	}
+
+	@DeleteMapping("/tiposDocumentos/{id}")
+	public ResponseEntity<String> eliminarTipoDocumento(@PathVariable Long id) {
+
+		tipoIdentificacionRepository.deleteById(id);
+		return ResponseEntity.ok("Registro eliminado de forma exitosa");
+	}
+
+	@GetMapping("/tiposDocumentos/{id}")
+	public TipoIdentificacionDTO buscarTipoDocumento(@PathVariable Long id) {
+		TipoIdentificacionDTO tipoIdentificacionDTO = new TipoIdentificacionDTO();
+
+		try {
+			TipoIdentificacion tipoIdentificacion = tipoIdentificacionRepository.findById(id).get();
+			tipoIdentificacionDTO = convertTipoIdentificacion.convertToDTO(tipoIdentificacion);
+		} catch (ParseException e) {
+			System.err.println("Error convirtiendo a entity a DTO: " + e.getMessage() + e.getCause());
+		}
+		return tipoIdentificacionDTO;
+	}
+
+	@PutMapping("/tiposDocumentos/{id}")
+	public Map<String, String> updateTipoDocumento(@RequestBody TipoIdentificacion newTipoDoc, @PathVariable Long id) {
+		Map<String, String> response = new HashMap<>();
+		boolean dato = tipoIdentificacionRepository.findById(id).isPresent();
+		System.err.println("Error Actualizando" + dato);
+		if (tipoIdentificacionRepository.findById(id).isPresent()) {
+			TipoIdentificacion tipoDoc = tipoIdentificacionRepository.findById(id).get();
+
+			tipoDoc.setTipoDocumento(newTipoDoc.getTipoDocumento());
+			tipoDoc.setDescripcion(newTipoDoc.getDescripcion());
+			tipoIdentificacionRepository.save(tipoDoc);
+			response.put(Constantes.CODIGO_HTTP, "200");
+			response.put(Constantes.MENSAJE_EXITO, "Registro actualizado exitosamente");
+			return response;
+		}
+		response.put(Constantes.CODIGO_HTTP, "500");
+		response.put(Constantes.MENSAJE_ERROR, "Ocurrió un problema al actualizar el registro");
+		return response;
+
+	}
 
 	@PostMapping("/agenciaInmobiliaria/adicionarUsuario")
 	public Map<String, String> adicionarUsuario(@RequestBody RegistrarUsuarioDTO registrarUsuarioDTO) {

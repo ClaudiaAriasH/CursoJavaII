@@ -6,6 +6,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 
 import co.com.udem.agenciainmobiliaria.util.ConvertRegistrarUsuario;
+import co.com.udem.agenciainmobiliaria.util.ConvertTipoIdentificacion;
 
 @SpringBootApplication
 public class AgenciainmobiliariaApplication {
@@ -17,6 +18,11 @@ public class AgenciainmobiliariaApplication {
 	@Bean
 	public ConvertRegistrarUsuario convertRegistrarUsuario() {
 		return new ConvertRegistrarUsuario();
+	}
+
+	@Bean
+	public ConvertTipoIdentificacion convertTipoIdentificación() {
+		return new ConvertTipoIdentificacion();
 	}
 
 	@Bean

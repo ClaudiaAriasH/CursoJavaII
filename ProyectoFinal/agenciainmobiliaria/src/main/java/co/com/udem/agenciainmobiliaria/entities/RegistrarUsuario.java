@@ -24,6 +24,8 @@ public class RegistrarUsuario {
 		super();
 
 	}
+	
+	
 
 	public RegistrarUsuario(Long id, String nombres, String apellidos, String tipoIdentificacion,
 			String numeroIdentificacion, String direccion, String telefono, String email, String password) {
@@ -38,6 +40,8 @@ public class RegistrarUsuario {
 		this.email = email;
 		this.password = password;
 	}
+
+
 
 	public Long getId() {
 		return id;
@@ -110,5 +114,6 @@ public class RegistrarUsuario {
 	public void setPassword(String password) {
 		this.password = password;
 	}
+
 
 }
