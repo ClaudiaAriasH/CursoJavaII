@@ -49,7 +49,7 @@ public class UsuarioRestControllerTest {
 
 	@Test
 	public void testGetUsuarioById() {
-		Usuario usuario = restTemplate.getForObject(getRootUrl() + "/usuarios/4", Usuario.class);
+		Usuario usuario = restTemplate.getForObject(getRootUrl() + "/usuarios/1", Usuario.class);
 		System.out.println(usuario.getFirsName());
 		assertNotNull(usuario);
 	}
