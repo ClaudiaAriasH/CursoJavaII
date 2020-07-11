@@ -44,8 +44,8 @@ public class AgenciaInmobiliariaRestControllerTest {
 		registrarUsuarioDTO.setNombres("Saenz");
 		registrarUsuarioDTO.setDireccion("Carrera 68B");
 		registrarUsuarioDTO.setEmail("sash@gmail.com");
-		registrarUsuarioDTO.setNumeroIdentificacion("1037645338");
-		registrarUsuarioDTO.setTipoIdentificacion("PA");
+		registrarUsuarioDTO.setNumeroIdentificacion("10376453348");
+		registrarUsuarioDTO.setTipoIdentificacion("CC");
 		registrarUsuarioDTO.setPassword("2020sash*");
 		registrarUsuarioDTO.setTelefono("5982764");
 		ResponseEntity<RegistrarUsuarioDTO> postResponse = restTemplate.postForEntity(
@@ -65,7 +65,7 @@ public class AgenciaInmobiliariaRestControllerTest {
 		registrarUsuarioDTO.setNombres("Saenz");
 		registrarUsuarioDTO.setDireccion("Carrera 68B");
 		registrarUsuarioDTO.setEmail("sash01@gmail.com");
-		registrarUsuarioDTO.setNumeroIdentificacion("1037645338");
+		registrarUsuarioDTO.setNumeroIdentificacion("1111111");
 		registrarUsuarioDTO.setTipoIdentificacion("PA");
 		registrarUsuarioDTO.setPassword("1990sash**");
 		registrarUsuarioDTO.setTelefono("5980099");
@@ -111,8 +111,8 @@ public class AgenciaInmobiliariaRestControllerTest {
 	@Test
 	public void adicionarTipoDocumentoTest() {
 		TipoIdentificacionDTO tipoIdentificacionDTO = new TipoIdentificacionDTO();
-		tipoIdentificacionDTO.setTipoDocumento("PA");
-		tipoIdentificacionDTO.setDescripcion("Cédula de Ciudadanía");		
+		tipoIdentificacionDTO.setTipoDocumento("CE");
+		tipoIdentificacionDTO.setDescripcion("Cédula de Extramjeria");		
 		ResponseEntity<TipoIdentificacionDTO> postResponse = restTemplate.postForEntity(
 				getRootUrl() + "/agenciaInmobiliaria/adicionarTipoDocumento", tipoIdentificacionDTO, TipoIdentificacionDTO.class);
 		assertNotNull(postResponse);

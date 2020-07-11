@@ -6,4 +6,6 @@ import co.com.udem.agenciainmobiliaria.entities.RegistrarUsuario;
 
 public interface RegistrarUsuarioRepository extends CrudRepository<RegistrarUsuario, Long> {
 
+	RegistrarUsuario findByNumeroIdentificacionAndTipoIdentificacion(String numeroIdentificacion,
+			String tipoIdentificacion);
 }

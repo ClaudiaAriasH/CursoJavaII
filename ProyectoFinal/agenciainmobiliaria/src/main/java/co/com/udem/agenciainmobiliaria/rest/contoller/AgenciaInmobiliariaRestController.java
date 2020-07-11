@@ -2,12 +2,12 @@ package co.com.udem.agenciainmobiliaria.rest.contoller;
 
 import java.text.ParseException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -44,9 +44,18 @@ public class AgenciaInmobiliariaRestController {
 		Map<String, String> response = new HashMap<>();
 		try {
 			TipoIdentificacion tipoIdentificacion = convertTipoIdentificacion.convertToEntity(tipoIdentificacionDTO);
-			tipoIdentificacionRepository.save(tipoIdentificacion);
-			response.put(Constantes.CODIGO_HTTP, "200");
-			response.put(Constantes.MENSAJE_EXITO, "Se insertado el Tipo de Documento  exitosamente");
+			TipoIdentificacion tipoDocumentoExiste = tipoIdentificacionRepository
+					.findByTipoDocumento(tipoIdentificacion.getTipoDocumento());
+
+			if (tipoDocumentoExiste != null) {
+				response.put(Constantes.CODIGO_HTTP, "100");
+				response.put(Constantes.MENSAJE_EXITO, "El tipo de documento ya existe");
+			} else {
+
+				tipoIdentificacionRepository.save(tipoIdentificacion);
+				response.put(Constantes.CODIGO_HTTP, "200");
+				response.put(Constantes.MENSAJE_EXITO, "Se insertado el Tipo de Documento  exitosamente");
+			}
 			return response;
 		} catch (ParseException e) {
 			response.put(Constantes.CODIGO_HTTP, "500");
@@ -57,16 +66,31 @@ public class AgenciaInmobiliariaRestController {
 	}
 
 	@GetMapping("/tiposDocumentos")
-	public Iterable<TipoIdentificacion> listarTiposDocumentos() {
+	public List<TipoIdentificacionDTO> listarTiposDocumentos() {
+		List<TipoIdentificacionDTO> tipoDocumentosDTO = null;
+		try {
+			Iterable<TipoIdentificacion> tipoDocumentos = tipoIdentificacionRepository.findAll();
+			tipoDocumentosDTO = convertTipoIdentificacion.convertToDTOIterable(tipoDocumentos);
 
-		return tipoIdentificacionRepository.findAll();
+		} catch (ParseException e) {
+			logger.error("Error al convertir Tipo de documentos en DTO");
+		}
+		return tipoDocumentosDTO;
 	}
 
 	@DeleteMapping("/tiposDocumentos/{id}")
-	public ResponseEntity<String> eliminarTipoDocumento(@PathVariable Long id) {
-
-		tipoIdentificacionRepository.deleteById(id);
-		return ResponseEntity.ok("Registro eliminado de forma exitosa");
+	public Map<String, String> eliminarTipoDocumento(@PathVariable Long id) {
+		Map<String, String> response = new HashMap<>();
+		if (tipoIdentificacionRepository.findById(id).isPresent()) {
+			tipoIdentificacionRepository.deleteById(id);
+			response.put(Constantes.CODIGO_HTTP, "200");
+			response.put(Constantes.MENSAJE_ERROR, "Registro eliminado de forma exitosa");
+			return response;
+		} else {
+			response.put(Constantes.CODIGO_HTTP, "100");
+			response.put(Constantes.MENSAJE_ERROR, "El registro no existe en la base de datos");
+		}
+		return response;
 	}
 
 	@GetMapping("/tiposDocumentos/{id}")
@@ -116,9 +140,18 @@ public class AgenciaInmobiliariaRestController {
 		Map<String, String> response = new HashMap<>();
 		try {
 			RegistrarUsuario registrarUsuario = convertRegistrarUsuario.convertToEntity(registrarUsuarioDTO);
-			registrarUsuarioRepository.save(registrarUsuario);
-			response.put(Constantes.CODIGO_HTTP, "200");
-			response.put(Constantes.MENSAJE_EXITO, "Registrado insertado exitosamente");
+
+			RegistrarUsuario usuarioExiste = registrarUsuarioRepository.findByNumeroIdentificacionAndTipoIdentificacion(
+					registrarUsuario.getNumeroIdentificacion(), registrarUsuario.getTipoIdentificacion());
+
+			if (usuarioExiste != null) {
+				response.put(Constantes.CODIGO_HTTP, "100");
+				response.put(Constantes.MENSAJE_EXITO, "El usuario ya existe");
+			} else {
+				registrarUsuarioRepository.save(registrarUsuario);
+				response.put(Constantes.CODIGO_HTTP, "200");
+				response.put(Constantes.MENSAJE_EXITO, "Registrado insertado exitosamente");
+			}
 			return response;
 		} catch (ParseException e) {
 			response.put(Constantes.CODIGO_HTTP, "500");
@@ -135,10 +168,20 @@ public class AgenciaInmobiliariaRestController {
 	}
 
 	@DeleteMapping("/usuarios/{id}")
-	public ResponseEntity<String> eliminarUsuario(@PathVariable Long id) {
+	public Map<String, String> eliminarUsuario(@PathVariable Long id) {
+		Map<String, String> response = new HashMap<>();
+		if (registrarUsuarioRepository.findById(id).isPresent()) {
+			registrarUsuarioRepository.deleteById(id);
+			response.put(Constantes.CODIGO_HTTP, "200");
+			response.put(Constantes.MENSAJE_ERROR, "Registro eliminado de forma exitosa");
+			return response;
+		} else {
+			response.put(Constantes.CODIGO_HTTP, "100");
+			response.put(Constantes.MENSAJE_ERROR, "El registro no existe en la base de datos");
+		}
 
-		registrarUsuarioRepository.deleteById(id);
-		return ResponseEntity.ok("Registro eliminado de forma exitosa");
+		return response;
+
 	}
 
 	@GetMapping("/usuarios/{id}")
