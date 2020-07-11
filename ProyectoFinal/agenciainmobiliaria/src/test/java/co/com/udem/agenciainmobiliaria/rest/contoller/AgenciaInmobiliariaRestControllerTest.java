@@ -65,7 +65,7 @@ public class AgenciaInmobiliariaRestControllerTest {
 		registrarUsuarioDTO.setNombres("Saenz");
 		registrarUsuarioDTO.setDireccion("Carrera 68B");
 		registrarUsuarioDTO.setEmail("sash01@gmail.com");
-		registrarUsuarioDTO.setNumeroIdentificacion("1111111");
+		registrarUsuarioDTO.setNumeroIdentificacion("111111122");
 		registrarUsuarioDTO.setTipoIdentificacion("PA");
 		registrarUsuarioDTO.setPassword("1990sash**");
 		registrarUsuarioDTO.setTelefono("5980099");
@@ -111,8 +111,8 @@ public class AgenciaInmobiliariaRestControllerTest {
 	@Test
 	public void adicionarTipoDocumentoTest() {
 		TipoIdentificacionDTO tipoIdentificacionDTO = new TipoIdentificacionDTO();
-		tipoIdentificacionDTO.setTipoDocumento("CE");
-		tipoIdentificacionDTO.setDescripcion("Cédula de Extramjeria");		
+		tipoIdentificacionDTO.setTipoDocumento("PE");
+		tipoIdentificacionDTO.setDescripcion("PEP");		
 		ResponseEntity<TipoIdentificacionDTO> postResponse = restTemplate.postForEntity(
 				getRootUrl() + "/agenciaInmobiliaria/adicionarTipoDocumento", tipoIdentificacionDTO, TipoIdentificacionDTO.class);
 		assertNotNull(postResponse);

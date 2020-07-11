@@ -94,16 +94,24 @@ public class AgenciaInmobiliariaRestController {
 	}
 
 	@GetMapping("/tiposDocumentos/{id}")
-	public TipoIdentificacionDTO buscarTipoDocumento(@PathVariable Long id) {
+	public Map<String, Object> buscarTipoDocumento(@PathVariable Long id) {
+		Map<String, Object> response = new HashMap<>();
 		TipoIdentificacionDTO tipoIdentificacionDTO = new TipoIdentificacionDTO();
 
 		try {
 			TipoIdentificacion tipoIdentificacion = tipoIdentificacionRepository.findById(id).get();
-			tipoIdentificacionDTO = convertTipoIdentificacion.convertToDTO(tipoIdentificacion);
+			if (tipoIdentificacion != null) {
+				tipoIdentificacionDTO = convertTipoIdentificacion.convertToDTO(tipoIdentificacion);
+				response.put(Constantes.CODIGO_HTTP, "200");
+				response.put("datos", tipoIdentificacionDTO);
+			}
+
+			return response;
 		} catch (ParseException e) {
-			logger.error("Error convirtiendo a entity a DTO");
+			response.put(Constantes.CODIGO_HTTP, "500");
+			response.put(Constantes.MENSAJE_ERROR, "Fallo al buscar el Tipo de Documento");
 		}
-		return tipoIdentificacionDTO;
+		return response;
 	}
 
 	@PutMapping("/tiposDocumentos/{id}")
