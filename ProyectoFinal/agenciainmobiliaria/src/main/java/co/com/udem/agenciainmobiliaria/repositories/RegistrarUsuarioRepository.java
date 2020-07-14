@@ -8,4 +8,5 @@ public interface RegistrarUsuarioRepository extends CrudRepository<RegistrarUsua
 
 	RegistrarUsuario findByNumeroIdentificacionAndTipoIdentificacion(String numeroIdentificacion,
 			String tipoIdentificacion);
+	
 }

@@ -40,14 +40,14 @@ public class AgenciaInmobiliariaRestControllerTest {
 	@Test
 	public void adicionarClubFubolTest() {
 		RegistrarUsuarioDTO registrarUsuarioDTO = new RegistrarUsuarioDTO();
-		registrarUsuarioDTO.setApellidos("Sasha");
-		registrarUsuarioDTO.setNombres("Saenz");
-		registrarUsuarioDTO.setDireccion("Carrera 68B");
-		registrarUsuarioDTO.setEmail("sash@gmail.com");
-		registrarUsuarioDTO.setNumeroIdentificacion("10376453348");
+		registrarUsuarioDTO.setApellidos("Arias Hernandez");
+		registrarUsuarioDTO.setNombres("Claudia ");
+		registrarUsuarioDTO.setDireccion("Carrera 60 # 59-38");
+		registrarUsuarioDTO.setEmail("claarher@gmail.com");
+		registrarUsuarioDTO.setNumeroIdentificacion("39206924");
 		registrarUsuarioDTO.setTipoIdentificacion("CC");
-		registrarUsuarioDTO.setPassword("2020sash*");
-		registrarUsuarioDTO.setTelefono("5982764");
+		registrarUsuarioDTO.setPassword("Antioquia2020*");
+		registrarUsuarioDTO.setTelefono("5982252");
 		ResponseEntity<RegistrarUsuarioDTO> postResponse = restTemplate.postForEntity(
 				getRootUrl() + "/agenciaInmobiliaria/adicionarUsuario", registrarUsuarioDTO, RegistrarUsuarioDTO.class);
 		assertNotNull(postResponse);
@@ -61,8 +61,8 @@ public class AgenciaInmobiliariaRestControllerTest {
 		RegistrarUsuarioDTO registrarUsuarioDTO = restTemplate.getForObject(getRootUrl() + "/usuarios/" + id,
 				RegistrarUsuarioDTO.class);
 
-		registrarUsuarioDTO.setApellidos("Sasha");
-		registrarUsuarioDTO.setNombres("Saenz");
+		registrarUsuarioDTO.setApellidos("Saens Prueba");
+		registrarUsuarioDTO.setNombres("Sasha");
 		registrarUsuarioDTO.setDireccion("Carrera 68B");
 		registrarUsuarioDTO.setEmail("sash01@gmail.com");
 		registrarUsuarioDTO.setNumeroIdentificacion("111111122");
@@ -77,15 +77,13 @@ public class AgenciaInmobiliariaRestControllerTest {
 
 	@Test
 	public void testDeleteUsuario() {
-		int id = 11;
-		RegistrarUsuario usuario = restTemplate.getForObject(getRootUrl() + "/usuarios/" + id,
-				RegistrarUsuario.class);
+		int id = 15;
+		RegistrarUsuario usuario = restTemplate.getForObject(getRootUrl() + "/usuarios/" + id, RegistrarUsuario.class);
 		assertNotNull(usuario);
 		restTemplate.delete(getRootUrl() + "/usuarios/" + id);
 		try {
 			usuario = restTemplate.getForObject(getRootUrl() + "/usuarios/" + id, RegistrarUsuario.class);
-			System.err.println("Datos testDeleteUsuario: "+ id);
-			
+
 		} catch (final HttpClientErrorException e) {
 			assertEquals(HttpStatus.NOT_FOUND, e.getStatusCode());
 		}
@@ -102,24 +100,25 @@ public class AgenciaInmobiliariaRestControllerTest {
 
 	@Test
 	public void testGetUsuarioById() {
-		RegistrarUsuario usuario = restTemplate.getForObject(getRootUrl() + "/usuarios/2", RegistrarUsuario.class);
-		System.err.println("Datos testGetUsuarioById: "+ usuario.getNumeroIdentificacion());
+		RegistrarUsuarioDTO usuario = restTemplate.getForObject(getRootUrl() + "/usuarios/3",
+				RegistrarUsuarioDTO.class);
+
 		assertNotNull(usuario);
 	}
-	
 
 	@Test
 	public void adicionarTipoDocumentoTest() {
 		TipoIdentificacionDTO tipoIdentificacionDTO = new TipoIdentificacionDTO();
 		tipoIdentificacionDTO.setTipoDocumento("PE");
-		tipoIdentificacionDTO.setDescripcion("PEP");		
+		tipoIdentificacionDTO.setDescripcion("Permiso Especial");
 		ResponseEntity<TipoIdentificacionDTO> postResponse = restTemplate.postForEntity(
-				getRootUrl() + "/agenciaInmobiliaria/adicionarTipoDocumento", tipoIdentificacionDTO, TipoIdentificacionDTO.class);
+				getRootUrl() + "/agenciaInmobiliaria/adicionarTipoDocumento", tipoIdentificacionDTO,
+				TipoIdentificacionDTO.class);
 		assertNotNull(postResponse);
 		assertNotNull(postResponse.getBody());
 
 	}
-	
+
 	@Test
 	public void updateTipoDocumentoTest() {
 		int id = 2;
@@ -127,42 +126,43 @@ public class AgenciaInmobiliariaRestControllerTest {
 				TipoIdentificacionDTO.class);
 
 		tipoIdentificacionDTO.setTipoDocumento("CC");
-		tipoIdentificacionDTO.setDescripcion("Cédula PRUEBA ID 2");
+		tipoIdentificacionDTO.setDescripcion("Cédula");
 		restTemplate.put(getRootUrl() + "/tiposDocumentos/" + id, tipoIdentificacionDTO);
 		RegistrarUsuarioDTO updateTipoDocumento = restTemplate.getForObject(getRootUrl() + "/tiposDocumentos/" + id,
 				RegistrarUsuarioDTO.class);
 		assertNotNull(updateTipoDocumento);
 	}
-	
+
 	@Test
 	public void testDeleteTipoDocumento() {
-		int id = 4;
+		int id = 8;
 		TipoIdentificacion tipoIdentificacion = restTemplate.getForObject(getRootUrl() + "/tiposDocumentos/" + id,
 				TipoIdentificacion.class);
 		assertNotNull(tipoIdentificacion);
 		restTemplate.delete(getRootUrl() + "/tiposDocumentos/" + id);
 		try {
-			tipoIdentificacion = restTemplate.getForObject(getRootUrl() + "/tiposDocumentos/" + id, TipoIdentificacion.class);
-			System.err.println("Datos testDeleteUsuario: "+ id);
-			
+			tipoIdentificacion = restTemplate.getForObject(getRootUrl() + "/tiposDocumentos/" + id,
+					TipoIdentificacion.class);
+
 		} catch (final HttpClientErrorException e) {
 			assertEquals(HttpStatus.NOT_FOUND, e.getStatusCode());
 		}
 	}
-	
+
 	@Test
 	public void testGetAllTiposDocumentos() {
 		HttpHeaders headers = new HttpHeaders();
 		HttpEntity<String> entity = new HttpEntity<String>(null, headers);
-		ResponseEntity<String> response = restTemplate.exchange(getRootUrl() + "/tiposDocumentos", HttpMethod.GET, entity,
-				String.class);
+		ResponseEntity<String> response = restTemplate.exchange(getRootUrl() + "/tiposDocumentos", HttpMethod.GET,
+				entity, String.class);
 		assertNotNull(response.getBody());
 	}
 
 	@Test
 	public void testGetTipoDocumentoById() {
-		TipoIdentificacion tipoIdentificacion = restTemplate.getForObject(getRootUrl() + "/tiposDocumentos/2", TipoIdentificacion.class);
-		System.err.println("Datos testGetTipoDocumentoById: "+ tipoIdentificacion.getTipoDocumento());
+		TipoIdentificacionDTO tipoIdentificacion = restTemplate.getForObject(getRootUrl() + "/tiposDocumentos/3",
+				TipoIdentificacionDTO.class);
+
 		assertNotNull(tipoIdentificacion);
 	}
 }

@@ -1,6 +1,7 @@
 package co.com.udem.agenciainmobiliaria.rest.contoller;
 
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -67,6 +68,7 @@ public class AgenciaInmobiliariaRestController {
 
 	@GetMapping("/tiposDocumentos")
 	public List<TipoIdentificacionDTO> listarTiposDocumentos() {
+
 		List<TipoIdentificacionDTO> tipoDocumentosDTO = null;
 		try {
 			Iterable<TipoIdentificacion> tipoDocumentos = tipoIdentificacionRepository.findAll();
@@ -99,14 +101,19 @@ public class AgenciaInmobiliariaRestController {
 		TipoIdentificacionDTO tipoIdentificacionDTO = new TipoIdentificacionDTO();
 
 		try {
-			TipoIdentificacion tipoIdentificacion = tipoIdentificacionRepository.findById(id).get();
-			if (tipoIdentificacion != null) {
+			if (tipoIdentificacionRepository.findById(id).isPresent()) {
+				TipoIdentificacion tipoIdentificacion = tipoIdentificacionRepository.findById(id).get();
+
 				tipoIdentificacionDTO = convertTipoIdentificacion.convertToDTO(tipoIdentificacion);
 				response.put(Constantes.CODIGO_HTTP, "200");
 				response.put("datos", tipoIdentificacionDTO);
+				return response;
 			}
 
-			return response;
+			else {
+				response.put(Constantes.CODIGO_HTTP, "100");
+				response.put(Constantes.MENSAJE_EXITO, "El tipo de documento no existe");
+			}
 		} catch (ParseException e) {
 			response.put(Constantes.CODIGO_HTTP, "500");
 			response.put(Constantes.MENSAJE_ERROR, "Fallo al buscar el Tipo de Documento");
@@ -131,6 +138,10 @@ public class AgenciaInmobiliariaRestController {
 				response.put(Constantes.CODIGO_HTTP, "200");
 				response.put(Constantes.MENSAJE_EXITO, "Se actualizo el Tipo de Documento exitosamente");
 				return response;
+			} else {
+				response.put(Constantes.CODIGO_HTTP, "100");
+				response.put(Constantes.MENSAJE_EXITO, "El tipo de documento no existe");
+
 			}
 
 		} catch (ParseException e) {
@@ -170,9 +181,17 @@ public class AgenciaInmobiliariaRestController {
 	}
 
 	@GetMapping("/usuarios")
-	public Iterable<RegistrarUsuario> listarUsuarios() {
+	public List<RegistrarUsuarioDTO> listarUsuarios() {
 
-		return registrarUsuarioRepository.findAll();
+		List<RegistrarUsuarioDTO> registrarUsuarioDTO = new ArrayList<>();
+		try {
+			Iterable<RegistrarUsuario> registrarUsuario = registrarUsuarioRepository.findAll();
+			registrarUsuarioDTO = convertRegistrarUsuario.convertToDTOIterable(registrarUsuario);
+
+		} catch (ParseException e) {
+			logger.error("Error al convertir Registrar Usuario en DTO");
+		}
+		return registrarUsuarioDTO;
 	}
 
 	@DeleteMapping("/usuarios/{id}")
@@ -193,17 +212,29 @@ public class AgenciaInmobiliariaRestController {
 	}
 
 	@GetMapping("/usuarios/{id}")
-	public RegistrarUsuarioDTO buscarUsuario(@PathVariable Long id) {
+	public Map<String, Object> buscarUsuario(@PathVariable Long id) {
+		Map<String, Object> response = new HashMap<>();
 		RegistrarUsuarioDTO registrarUsuarioDTO = new RegistrarUsuarioDTO();
 
 		try {
-			RegistrarUsuario usuario = registrarUsuarioRepository.findById(id).get();
-			registrarUsuarioDTO = convertRegistrarUsuario.convertToDTO(usuario);
-		} catch (ParseException e) {
 
-			logger.error("Error convirtiendo a entity a DTO");
+			if (registrarUsuarioRepository.findById(id).isPresent()) {
+				RegistrarUsuario usuario = registrarUsuarioRepository.findById(id).get();
+
+				registrarUsuarioDTO = convertRegistrarUsuario.convertToDTO(usuario);
+				response.put(Constantes.CODIGO_HTTP, "200");
+				response.put("datos", registrarUsuarioDTO);
+				return response;
+			} else {
+				response.put(Constantes.CODIGO_HTTP, "100");
+				response.put(Constantes.MENSAJE_EXITO, "El usuario no existe");
+			}
+
+		} catch (ParseException e) {
+			response.put(Constantes.CODIGO_HTTP, "500");
+			response.put(Constantes.MENSAJE_ERROR, "Fallo al buscar el Usuario");
 		}
-		return registrarUsuarioDTO;
+		return response;
 	}
 
 	@PutMapping("/usuarios/{id}")
@@ -226,6 +257,10 @@ public class AgenciaInmobiliariaRestController {
 				response.put(Constantes.CODIGO_HTTP, "200");
 				response.put(Constantes.MENSAJE_EXITO, "Se actualizo el Usuario exitosamente");
 				return response;
+			} else {
+				response.put(Constantes.CODIGO_HTTP, "100");
+				response.put(Constantes.MENSAJE_EXITO, "El usuario no existe");
+
 			}
 
 		} catch (ParseException e) {

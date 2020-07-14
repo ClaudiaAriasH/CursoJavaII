@@ -29,4 +29,5 @@ public class AgenciainmobiliariaApplication {
 	public ModelMapper modelMapper() {
 		return new ModelMapper();
 	}
+
 }
