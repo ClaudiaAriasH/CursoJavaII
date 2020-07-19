@@ -1,4 +1,4 @@
-package co.com.udem;
+package co.com.udem.agenciainmobiliaria;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

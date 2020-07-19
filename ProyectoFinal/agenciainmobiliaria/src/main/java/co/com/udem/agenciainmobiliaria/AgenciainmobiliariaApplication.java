@@ -4,6 +4,8 @@ import org.modelmapper.ModelMapper;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import co.com.udem.agenciainmobiliaria.dto.TipoIdentificacionDTO;
 import co.com.udem.agenciainmobiliaria.util.ConvertRegistrarUsuario;
@@ -34,6 +36,11 @@ public class AgenciainmobiliariaApplication {
 	@Bean
 	public TipoIdentificacionDTO tipoIdentificacionDTO() {
 		return new TipoIdentificacionDTO();
+	}
+
+	@Bean
+	PasswordEncoder getEncoder() {
+		return new BCryptPasswordEncoder();
 	}
 
 }

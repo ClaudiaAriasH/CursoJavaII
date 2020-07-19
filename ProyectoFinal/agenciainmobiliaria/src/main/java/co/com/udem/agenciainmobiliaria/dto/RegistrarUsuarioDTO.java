@@ -7,7 +7,6 @@ public class RegistrarUsuarioDTO {
 	private Long id;
 	private String nombres;
 	private String apellidos;
-
 	private String numeroIdentificacion;
 	private String direccion;
 	private String telefono;
@@ -28,7 +27,6 @@ public class RegistrarUsuarioDTO {
 		this.id = id;
 		this.nombres = nombres;
 		this.apellidos = apellidos;
-
 		this.numeroIdentificacion = numeroIdentificacion;
 		this.direccion = direccion;
 		this.telefono = telefono;

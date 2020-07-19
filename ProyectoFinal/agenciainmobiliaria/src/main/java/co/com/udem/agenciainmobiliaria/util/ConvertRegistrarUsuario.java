@@ -21,6 +21,7 @@ public class ConvertRegistrarUsuario {
 	}
 
 	public RegistrarUsuarioDTO convertToDTO(RegistrarUsuario registrarUsuario) throws ParseException {
+		
 		return modelMapper.map(registrarUsuario, RegistrarUsuarioDTO.class);
 	}
 
