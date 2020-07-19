@@ -5,6 +5,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 
+import co.com.udem.agenciainmobiliaria.dto.TipoIdentificacionDTO;
 import co.com.udem.agenciainmobiliaria.util.ConvertRegistrarUsuario;
 import co.com.udem.agenciainmobiliaria.util.ConvertTipoIdentificacion;
 
@@ -28,6 +29,11 @@ public class AgenciainmobiliariaApplication {
 	@Bean
 	public ModelMapper modelMapper() {
 		return new ModelMapper();
+	}
+
+	@Bean
+	public TipoIdentificacionDTO tipoIdentificacionDTO() {
+		return new TipoIdentificacionDTO();
 	}
 
 }

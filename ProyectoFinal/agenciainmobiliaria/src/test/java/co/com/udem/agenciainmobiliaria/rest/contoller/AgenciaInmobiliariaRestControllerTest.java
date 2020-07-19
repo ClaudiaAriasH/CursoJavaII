@@ -44,10 +44,16 @@ public class AgenciaInmobiliariaRestControllerTest {
 		registrarUsuarioDTO.setNombres("Claudia ");
 		registrarUsuarioDTO.setDireccion("Carrera 60 # 59-38");
 		registrarUsuarioDTO.setEmail("claarher@gmail.com");
-		registrarUsuarioDTO.setNumeroIdentificacion("39206924");
-		registrarUsuarioDTO.setTipoIdentificacion("CC");
+		registrarUsuarioDTO.setNumeroIdentificacion("392069245");
+
 		registrarUsuarioDTO.setPassword("Antioquia2020*");
 		registrarUsuarioDTO.setTelefono("5982252");
+		
+		TipoIdentificacionDTO tipoIdentificacionDTO=new TipoIdentificacionDTO();
+		tipoIdentificacionDTO.setId(6L);
+		tipoIdentificacionDTO.setTipoDocumento("CC");
+		tipoIdentificacionDTO.setDescripcion("Cédula de Ciudadanía");
+		registrarUsuarioDTO.setTipoIdentificacionDTO(tipoIdentificacionDTO);
 		ResponseEntity<RegistrarUsuarioDTO> postResponse = restTemplate.postForEntity(
 				getRootUrl() + "/agenciaInmobiliaria/adicionarUsuario", registrarUsuarioDTO, RegistrarUsuarioDTO.class);
 		assertNotNull(postResponse);
@@ -57,7 +63,7 @@ public class AgenciaInmobiliariaRestControllerTest {
 
 	@Test
 	public void testUpdateUsuario() {
-		int id = 2;
+		int id = 17;
 		RegistrarUsuarioDTO registrarUsuarioDTO = restTemplate.getForObject(getRootUrl() + "/usuarios/" + id,
 				RegistrarUsuarioDTO.class);
 
@@ -66,9 +72,12 @@ public class AgenciaInmobiliariaRestControllerTest {
 		registrarUsuarioDTO.setDireccion("Carrera 68B");
 		registrarUsuarioDTO.setEmail("sash01@gmail.com");
 		registrarUsuarioDTO.setNumeroIdentificacion("111111122");
-		registrarUsuarioDTO.setTipoIdentificacion("PA");
+	
 		registrarUsuarioDTO.setPassword("1990sash**");
 		registrarUsuarioDTO.setTelefono("5980099");
+		TipoIdentificacionDTO tipoIdentificacionDTO=new TipoIdentificacionDTO();
+		tipoIdentificacionDTO.setId(6L);
+		registrarUsuarioDTO.setTipoIdentificacionDTO(tipoIdentificacionDTO);
 		restTemplate.put(getRootUrl() + "/usuarios/" + id, registrarUsuarioDTO);
 		RegistrarUsuarioDTO updatedUsuario = restTemplate.getForObject(getRootUrl() + "/usuarios/" + id,
 				RegistrarUsuarioDTO.class);

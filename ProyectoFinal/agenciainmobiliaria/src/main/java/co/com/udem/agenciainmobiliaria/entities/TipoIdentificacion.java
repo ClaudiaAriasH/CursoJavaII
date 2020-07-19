@@ -1,9 +1,12 @@
 package co.com.udem.agenciainmobiliaria.entities;
 
+import java.util.Collection;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 
 @Entity
 public class TipoIdentificacion {
@@ -13,6 +16,8 @@ public class TipoIdentificacion {
 	private Long id;
 	private String tipoDocumento;
 	private String descripcion;
+	@OneToMany(mappedBy = "tipoIdentificacion")
+	private Collection<RegistrarUsuario> registrarUsuario;
 
 	public TipoIdentificacion() {
 		super();
@@ -24,6 +29,7 @@ public class TipoIdentificacion {
 		this.id = id;
 		this.tipoDocumento = tipoDocumento;
 		this.descripcion = descripcion;
+
 	}
 
 	public Long getId() {

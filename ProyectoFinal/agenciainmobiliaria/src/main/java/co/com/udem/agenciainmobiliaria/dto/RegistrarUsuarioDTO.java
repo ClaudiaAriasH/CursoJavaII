@@ -1,34 +1,48 @@
 package co.com.udem.agenciainmobiliaria.dto;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 public class RegistrarUsuarioDTO {
 
 	private Long id;
 	private String nombres;
 	private String apellidos;
-	private String tipoIdentificacion;
+
 	private String numeroIdentificacion;
 	private String direccion;
 	private String telefono;
 	private String email;
 	private String password;
 
+	@Autowired
+	private TipoIdentificacionDTO tipoIdentificacionDTO;
+
 	public RegistrarUsuarioDTO() {
 		super();
 
 	}
 
-	public RegistrarUsuarioDTO(Long id, String nombres, String apellidos, String tipoIdentificacion,
-			String numeroIdentificacion, String direccion, String telefono, String email, String password) {
+	public RegistrarUsuarioDTO(Long id, String nombres, String apellidos, String numeroIdentificacion, String direccion,
+			String telefono, String email, String password, TipoIdentificacionDTO tipoIdentificacionDTO) {
 		super();
 		this.id = id;
 		this.nombres = nombres;
 		this.apellidos = apellidos;
-		this.tipoIdentificacion = tipoIdentificacion;
+
 		this.numeroIdentificacion = numeroIdentificacion;
 		this.direccion = direccion;
 		this.telefono = telefono;
 		this.email = email;
 		this.password = password;
+		this.tipoIdentificacionDTO = tipoIdentificacionDTO;
+	}
+
+	public TipoIdentificacionDTO getTipoIdentificacionDTO() {
+		return tipoIdentificacionDTO;
+	}
+
+	public void setTipoIdentificacionDTO(TipoIdentificacionDTO tipoIdentificacionDTO) {
+		this.tipoIdentificacionDTO = tipoIdentificacionDTO;
 	}
 
 	public Long getId() {
@@ -53,14 +67,6 @@ public class RegistrarUsuarioDTO {
 
 	public void setApellidos(String apellidos) {
 		this.apellidos = apellidos;
-	}
-
-	public String getTipoIdentificacion() {
-		return tipoIdentificacion;
-	}
-
-	public void setTipoIdentificacion(String tipoIdentificacion) {
-		this.tipoIdentificacion = tipoIdentificacion;
 	}
 
 	public String getNumeroIdentificacion() {

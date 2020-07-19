@@ -1,7 +1,6 @@
 package co.com.udem.agenciainmobiliaria.rest.contoller;
 
 import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -157,11 +156,13 @@ public class AgenciaInmobiliariaRestController {
 	@PostMapping("/agenciaInmobiliaria/adicionarUsuario")
 	public Map<String, String> adicionarUsuario(@RequestBody RegistrarUsuarioDTO registrarUsuarioDTO) {
 		Map<String, String> response = new HashMap<>();
+
 		try {
 			RegistrarUsuario registrarUsuario = convertRegistrarUsuario.convertToEntity(registrarUsuarioDTO);
 
-			RegistrarUsuario usuarioExiste = registrarUsuarioRepository.findByNumeroIdentificacionAndTipoIdentificacion(
-					registrarUsuario.getNumeroIdentificacion(), registrarUsuario.getTipoIdentificacion());
+			Long idTipoDoc = (registrarUsuario.getTipoIdentificacion().getId());
+			RegistrarUsuario usuarioExiste = registrarUsuarioRepository
+					.buscarDocumentoTipo(registrarUsuario.getNumeroIdentificacion(), idTipoDoc);
 
 			if (usuarioExiste != null) {
 				response.put(Constantes.CODIGO_HTTP, "100");
@@ -181,17 +182,9 @@ public class AgenciaInmobiliariaRestController {
 	}
 
 	@GetMapping("/usuarios")
-	public List<RegistrarUsuarioDTO> listarUsuarios() {
+	public Iterable<RegistrarUsuario> listarUsuarios() {
 
-		List<RegistrarUsuarioDTO> registrarUsuarioDTO = new ArrayList<>();
-		try {
-			Iterable<RegistrarUsuario> registrarUsuario = registrarUsuarioRepository.findAll();
-			registrarUsuarioDTO = convertRegistrarUsuario.convertToDTOIterable(registrarUsuario);
-
-		} catch (ParseException e) {
-			logger.error("Error al convertir Registrar Usuario en DTO");
-		}
-		return registrarUsuarioDTO;
+		return registrarUsuarioRepository.findAll();
 	}
 
 	@DeleteMapping("/usuarios/{id}")
