@@ -1,8 +1,8 @@
 package co.com.udem.agenciainmobiliaria.rest.contoller;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,16 +12,17 @@ import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.web.client.HttpClientErrorException;
+
+import com.google.gson.Gson;
 
 import co.com.udem.agenciainmobiliaria.AgenciainmobiliariaApplication;
+import co.com.udem.agenciainmobiliaria.dto.AutenticationRequestDTO;
+import co.com.udem.agenciainmobiliaria.dto.AutenticationResponseDTO;
 import co.com.udem.agenciainmobiliaria.dto.RegistrarUsuarioDTO;
 import co.com.udem.agenciainmobiliaria.dto.TipoIdentificacionDTO;
-import co.com.udem.agenciainmobiliaria.entities.RegistrarUsuario;
-import co.com.udem.agenciainmobiliaria.entities.TipoIdentificacion;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = AgenciainmobiliariaApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -33,31 +34,58 @@ public class AgenciaInmobiliariaRestControllerTest {
 	@LocalServerPort
 	private int port;
 
+	private String token;
+
+	private AutenticationRequestDTO autenticationRequestDTO = new AutenticationRequestDTO();
+
 	private String getRootUrl() {
 		return "http://localhost:" + port;
 	}
 
+	@Before
+	public void authorization() {
+		autenticationRequestDTO.setUsername("julio");
+		autenticationRequestDTO.setPassword("julio123**");
+		adicionarUsuario(autenticationRequestDTO);
+		ResponseEntity<String> postResponse = restTemplate.postForEntity(getRootUrl() + "/auth/signin",
+				autenticationRequestDTO, String.class);
+		Gson g = new Gson();
+		AutenticationResponseDTO autenticationResponseDTO = g.fromJson(postResponse.getBody(),
+				AutenticationResponseDTO.class);
+		token = autenticationResponseDTO.getToken();
+	}
+
+	private void adicionarUsuario(AutenticationRequestDTO autenticationRequestDTO) {
+		ResponseEntity<String> postResponse = restTemplate.postForEntity(getRootUrl() + "/users/addUser",
+				autenticationRequestDTO, String.class);
+		postResponse.getBody();
+	}
+
 	@Test
-	public void adicionarClubFubolTest() {
+	public void adicionarUsuarioWebTest() {
 		RegistrarUsuarioDTO registrarUsuarioDTO = new RegistrarUsuarioDTO();
 		registrarUsuarioDTO.setApellidos("Arias Hernandez");
 		registrarUsuarioDTO.setNombres("Claudia ");
 		registrarUsuarioDTO.setDireccion("Carrera 60 # 59-38");
 		registrarUsuarioDTO.setEmail("claarher@gmail.com");
 		registrarUsuarioDTO.setNumeroIdentificacion("392069245");
-
 		registrarUsuarioDTO.setPassword("Antioquia2020*");
 		registrarUsuarioDTO.setTelefono("5982252");
-		
-		TipoIdentificacionDTO tipoIdentificacionDTO=new TipoIdentificacionDTO();
+		TipoIdentificacionDTO tipoIdentificacionDTO = new TipoIdentificacionDTO();
 		tipoIdentificacionDTO.setId(6L);
 		tipoIdentificacionDTO.setTipoDocumento("CC");
 		tipoIdentificacionDTO.setDescripcion("Cédula de Ciudadanía");
 		registrarUsuarioDTO.setTipoIdentificacionDTO(tipoIdentificacionDTO);
-		ResponseEntity<RegistrarUsuarioDTO> postResponse = restTemplate.postForEntity(
-				getRootUrl() + "/agenciaInmobiliaria/adicionarUsuario", registrarUsuarioDTO, RegistrarUsuarioDTO.class);
-		assertNotNull(postResponse);
-		assertNotNull(postResponse.getBody());
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		System.out.println("El token adicionarUsuarioWebTest es: " + this.token);
+		headers.set("Authorization", "Bearer " + this.token);
+
+		HttpEntity<RegistrarUsuarioDTO> entity = new HttpEntity<RegistrarUsuarioDTO>(registrarUsuarioDTO, headers);
+		ResponseEntity<String> postResponse = restTemplate.exchange(
+				getRootUrl() + "/agenciaInmobiliaria/adicionarUsuario", HttpMethod.POST, entity, String.class);
+
+		assertEquals(200, postResponse.getStatusCode().value());
 
 	}
 
@@ -72,47 +100,67 @@ public class AgenciaInmobiliariaRestControllerTest {
 		registrarUsuarioDTO.setDireccion("Carrera 68B");
 		registrarUsuarioDTO.setEmail("sash01@gmail.com");
 		registrarUsuarioDTO.setNumeroIdentificacion("111111122");
-	
 		registrarUsuarioDTO.setPassword("1990sash**");
 		registrarUsuarioDTO.setTelefono("5980099");
-		TipoIdentificacionDTO tipoIdentificacionDTO=new TipoIdentificacionDTO();
+		TipoIdentificacionDTO tipoIdentificacionDTO = new TipoIdentificacionDTO();
 		tipoIdentificacionDTO.setId(6L);
 		registrarUsuarioDTO.setTipoIdentificacionDTO(tipoIdentificacionDTO);
-		restTemplate.put(getRootUrl() + "/usuarios/" + id, registrarUsuarioDTO);
-		RegistrarUsuarioDTO updatedUsuario = restTemplate.getForObject(getRootUrl() + "/usuarios/" + id,
-				RegistrarUsuarioDTO.class);
-		assertNotNull(updatedUsuario);
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		System.out.println("El token testUpdateUsuario es: " + this.token);
+		headers.set("Authorization", "Bearer " + this.token);
+
+		HttpEntity<RegistrarUsuarioDTO> entity = new HttpEntity<RegistrarUsuarioDTO>(registrarUsuarioDTO, headers);
+		ResponseEntity<String> postResponse = restTemplate.exchange(getRootUrl() + "/usuarios/" + id, HttpMethod.PUT,
+				entity, String.class);
+
+		assertEquals(200, postResponse.getStatusCode().value());
 	}
 
 	@Test
 	public void testDeleteUsuario() {
-		int id = 15;
-		RegistrarUsuario usuario = restTemplate.getForObject(getRootUrl() + "/usuarios/" + id, RegistrarUsuario.class);
-		assertNotNull(usuario);
-		restTemplate.delete(getRootUrl() + "/usuarios/" + id);
-		try {
-			usuario = restTemplate.getForObject(getRootUrl() + "/usuarios/" + id, RegistrarUsuario.class);
+		int id = 17;
 
-		} catch (final HttpClientErrorException e) {
-			assertEquals(HttpStatus.NOT_FOUND, e.getStatusCode());
-		}
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		System.out.println("El token testDeleteUsuario es: " + this.token);
+		headers.set("Authorization", "Bearer " + this.token);
+
+		HttpEntity<String> entity = new HttpEntity<String>(null, headers);
+		ResponseEntity<String> postResponse = restTemplate.exchange(getRootUrl() + "/usuarios/" + id, HttpMethod.DELETE,
+				entity, String.class);
+		System.out.println("Datos testDeleteUsuario: " + postResponse);
+		assertEquals(200, postResponse.getStatusCode().value());
 	}
 
 	@Test
 	public void testGetAllUsers() {
+
 		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		System.out.println("El token testGetAllUsers es: " + this.token);
+		headers.set("Authorization", "Bearer " + this.token);
+
 		HttpEntity<String> entity = new HttpEntity<String>(null, headers);
-		ResponseEntity<String> response = restTemplate.exchange(getRootUrl() + "/usuarios", HttpMethod.GET, entity,
+		ResponseEntity<String> postResponse = restTemplate.exchange(getRootUrl() + "/usuarios", HttpMethod.GET, entity,
 				String.class);
-		assertNotNull(response.getBody());
+		System.out.println("Datos testGetAllUsers: " + postResponse);
+		assertEquals(200, postResponse.getStatusCode().value());
 	}
 
 	@Test
 	public void testGetUsuarioById() {
-		RegistrarUsuarioDTO usuario = restTemplate.getForObject(getRootUrl() + "/usuarios/3",
-				RegistrarUsuarioDTO.class);
 
-		assertNotNull(usuario);
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		System.out.println("El token testGetUsuarioById es: " + this.token);
+		headers.set("Authorization", "Bearer " + this.token);
+
+		HttpEntity<String> entity = new HttpEntity<String>(null, headers);
+		ResponseEntity<String> postResponse = restTemplate.exchange(getRootUrl() + "/usuarios/3", HttpMethod.GET,
+				entity, String.class);
+		System.out.println("Datos testGetUsuarioById: " + postResponse);
+		assertEquals(200, postResponse.getStatusCode().value());
 	}
 
 	@Test
@@ -120,11 +168,18 @@ public class AgenciaInmobiliariaRestControllerTest {
 		TipoIdentificacionDTO tipoIdentificacionDTO = new TipoIdentificacionDTO();
 		tipoIdentificacionDTO.setTipoDocumento("PE");
 		tipoIdentificacionDTO.setDescripcion("Permiso Especial");
-		ResponseEntity<TipoIdentificacionDTO> postResponse = restTemplate.postForEntity(
-				getRootUrl() + "/agenciaInmobiliaria/adicionarTipoDocumento", tipoIdentificacionDTO,
-				TipoIdentificacionDTO.class);
-		assertNotNull(postResponse);
-		assertNotNull(postResponse.getBody());
+
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		System.out.println("El token adicionarTipoDocumentoTest es: " + this.token);
+		headers.set("Authorization", "Bearer " + this.token);
+
+		HttpEntity<TipoIdentificacionDTO> entity = new HttpEntity<TipoIdentificacionDTO>(tipoIdentificacionDTO,
+				headers);
+		ResponseEntity<String> postResponse = restTemplate.exchange(
+				getRootUrl() + "/agenciaInmobiliaria/adicionarTipoDocumento", HttpMethod.POST, entity, String.class);
+
+		assertEquals(200, postResponse.getStatusCode().value());
 
 	}
 
@@ -136,42 +191,63 @@ public class AgenciaInmobiliariaRestControllerTest {
 
 		tipoIdentificacionDTO.setTipoDocumento("CC");
 		tipoIdentificacionDTO.setDescripcion("Cédula");
-		restTemplate.put(getRootUrl() + "/tiposDocumentos/" + id, tipoIdentificacionDTO);
-		RegistrarUsuarioDTO updateTipoDocumento = restTemplate.getForObject(getRootUrl() + "/tiposDocumentos/" + id,
-				RegistrarUsuarioDTO.class);
-		assertNotNull(updateTipoDocumento);
+
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		System.out.println("El token updateTipoDocumentoTest es: " + this.token);
+		headers.set("Authorization", "Bearer " + this.token);
+
+		HttpEntity<TipoIdentificacionDTO> entity = new HttpEntity<TipoIdentificacionDTO>(tipoIdentificacionDTO,
+				headers);
+		ResponseEntity<String> postResponse = restTemplate.exchange(getRootUrl() + "/tiposDocumentos/" + id,
+				HttpMethod.PUT, entity, String.class);
+
+		assertEquals(200, postResponse.getStatusCode().value());
 	}
 
 	@Test
 	public void testDeleteTipoDocumento() {
-		int id = 8;
-		TipoIdentificacion tipoIdentificacion = restTemplate.getForObject(getRootUrl() + "/tiposDocumentos/" + id,
-				TipoIdentificacion.class);
-		assertNotNull(tipoIdentificacion);
-		restTemplate.delete(getRootUrl() + "/tiposDocumentos/" + id);
-		try {
-			tipoIdentificacion = restTemplate.getForObject(getRootUrl() + "/tiposDocumentos/" + id,
-					TipoIdentificacion.class);
+		int id = 5;
 
-		} catch (final HttpClientErrorException e) {
-			assertEquals(HttpStatus.NOT_FOUND, e.getStatusCode());
-		}
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		System.out.println("El token testDeleteTipoDocumento es: " + this.token);
+		headers.set("Authorization", "Bearer " + this.token);
+
+		HttpEntity<String> entity = new HttpEntity<String>(null, headers);
+		ResponseEntity<String> postResponse = restTemplate.exchange(getRootUrl() + "/tiposDocumentos/" + id,
+				HttpMethod.DELETE, entity, String.class);
+		System.out.println("Datos testDeleteTipoDocumento: " + postResponse);
+		assertEquals(200, postResponse.getStatusCode().value());
 	}
 
 	@Test
 	public void testGetAllTiposDocumentos() {
+
 		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		System.out.println("El token testGetAllTiposDocumentos es: " + this.token);
+		headers.set("Authorization", "Bearer " + this.token);
+
 		HttpEntity<String> entity = new HttpEntity<String>(null, headers);
-		ResponseEntity<String> response = restTemplate.exchange(getRootUrl() + "/tiposDocumentos", HttpMethod.GET,
+		ResponseEntity<String> postResponse = restTemplate.exchange(getRootUrl() + "/tiposDocumentos", HttpMethod.GET,
 				entity, String.class);
-		assertNotNull(response.getBody());
+		System.out.println("Datos testGetAllTiposDocumentos: " + postResponse);
+		assertEquals(200, postResponse.getStatusCode().value());
 	}
 
 	@Test
 	public void testGetTipoDocumentoById() {
-		TipoIdentificacionDTO tipoIdentificacion = restTemplate.getForObject(getRootUrl() + "/tiposDocumentos/3",
-				TipoIdentificacionDTO.class);
 
-		assertNotNull(tipoIdentificacion);
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		System.out.println("El token testGetTipoDocumentoById es: " + this.token);
+		headers.set("Authorization", "Bearer " + this.token);
+
+		HttpEntity<String> entity = new HttpEntity<String>(null, headers);
+		ResponseEntity<String> postResponse = restTemplate.exchange(getRootUrl() + "/tiposDocumentos/3", HttpMethod.GET,
+				entity, String.class);
+		System.out.println("Datos testGetTipoDocumentoById: " + postResponse);
+		assertEquals(200, postResponse.getStatusCode().value());
 	}
 }

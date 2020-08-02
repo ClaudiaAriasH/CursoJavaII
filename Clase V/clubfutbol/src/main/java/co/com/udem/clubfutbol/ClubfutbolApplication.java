@@ -3,6 +3,7 @@ package co.com.udem.clubfutbol;
 import org.modelmapper.ModelMapper;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -12,6 +13,7 @@ import co.com.udem.clubfutbol.util.ConvertClubFutbol;
 import co.com.udem.clubfutbol.util.ConvertDirectorTecnico;
 
 @SpringBootApplication
+@EnableDiscoveryClient
 public class ClubfutbolApplication {
 
 	public static void main(String[] args) {

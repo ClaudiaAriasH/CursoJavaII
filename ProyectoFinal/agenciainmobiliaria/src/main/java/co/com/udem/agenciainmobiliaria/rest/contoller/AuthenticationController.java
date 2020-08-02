@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import co.com.udem.agenciainmobiliaria.dto.AuthenticationRequest;
+import co.com.udem.agenciainmobiliaria.dto.AuthenticationRequestDTO;
 import co.com.udem.agenciainmobiliaria.repositories.UserRepository;
 import co.com.udem.agenciainmobiliaria.security.jwt.JwtTokenProvider;
 import co.com.udem.agenciainmobiliaria.util.Constantes;
@@ -33,7 +33,7 @@ public class AuthenticationController {
 	UserRepository users;
 
 	@PostMapping("/signin")
-	public Map<String, String> signin(@RequestBody AuthenticationRequest data) {
+	public Map<String, String> signin(@RequestBody AuthenticationRequestDTO data) {
 		Map<String, String> response = new HashMap<>();
 		try {
 			String username = data.getUsername();

@@ -4,6 +4,7 @@ import java.text.ParseException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -100,8 +101,9 @@ public class AgenciaInmobiliariaRestController {
 		TipoIdentificacionDTO tipoIdentificacionDTO = new TipoIdentificacionDTO();
 
 		try {
-			if (tipoIdentificacionRepository.findById(id).isPresent()) {
-				TipoIdentificacion tipoIdentificacion = tipoIdentificacionRepository.findById(id).get();
+			Optional<TipoIdentificacion> tipoIdent = tipoIdentificacionRepository.findById(id);
+			if (tipoIdent.isPresent()) {
+				TipoIdentificacion tipoIdentificacion = tipoIdent.get();
 
 				tipoIdentificacionDTO = convertTipoIdentificacion.convertToDTO(tipoIdentificacion);
 				response.put(Constantes.CODIGO_HTTP, "200");
@@ -111,7 +113,7 @@ public class AgenciaInmobiliariaRestController {
 
 			else {
 				response.put(Constantes.CODIGO_HTTP, "100");
-				response.put(Constantes.MENSAJE_EXITO, "El tipo de documento no existe");
+				response.put(Constantes.MENSAJE_EXITO, "El tipo de documento buscado no existe");
 			}
 		} catch (ParseException e) {
 			response.put(Constantes.CODIGO_HTTP, "500");
@@ -125,11 +127,12 @@ public class AgenciaInmobiliariaRestController {
 			@PathVariable Long id) {
 		Map<String, String> response = new HashMap<>();
 		try {
-			if (tipoIdentificacionRepository.findById(id).isPresent()) {
+			Optional<TipoIdentificacion> tipoIdent = tipoIdentificacionRepository.findById(id);
+			if (tipoIdent.isPresent()) {
 
 				TipoIdentificacion newTipoDoc = convertTipoIdentificacion.convertToEntity(newTipoDocDTO);
 
-				TipoIdentificacion tipoDoc = tipoIdentificacionRepository.findById(id).get();
+				TipoIdentificacion tipoDoc = tipoIdent.get();
 
 				tipoDoc.setTipoDocumento(newTipoDoc.getTipoDocumento());
 				tipoDoc.setDescripcion(newTipoDoc.getDescripcion());
@@ -161,16 +164,21 @@ public class AgenciaInmobiliariaRestController {
 			RegistrarUsuario registrarUsuario = convertRegistrarUsuario.convertToEntity(registrarUsuarioDTO);
 
 			Long idTipoDoc = (registrarUsuario.getTipoIdentificacion().getId());
+			Optional<TipoIdentificacion> tipoDocExiste = tipoIdentificacionRepository.findById(idTipoDoc);
 			RegistrarUsuario usuarioExiste = registrarUsuarioRepository
 					.buscarDocumentoTipo(registrarUsuario.getNumeroIdentificacion(), idTipoDoc);
-
-			if (usuarioExiste != null) {
-				response.put(Constantes.CODIGO_HTTP, "100");
-				response.put(Constantes.MENSAJE_EXITO, "El usuario ya existe");
+			if (tipoDocExiste.isPresent()) {
+				if (usuarioExiste != null) {
+					response.put(Constantes.CODIGO_HTTP, "100");
+					response.put(Constantes.MENSAJE_EXITO, "El usuario ya existe");
+				} else {
+					registrarUsuarioRepository.save(registrarUsuario);
+					response.put(Constantes.CODIGO_HTTP, "200");
+					response.put(Constantes.MENSAJE_EXITO, "Registrado insertado exitosamente");
+				}
 			} else {
-				registrarUsuarioRepository.save(registrarUsuario);
-				response.put(Constantes.CODIGO_HTTP, "200");
-				response.put(Constantes.MENSAJE_EXITO, "Registrado insertado exitosamente");
+				response.put(Constantes.CODIGO_HTTP, "100");
+				response.put(Constantes.MENSAJE_EXITO, "El tipo de documento no existe");
 			}
 			return response;
 		} catch (ParseException e) {
@@ -210,9 +218,9 @@ public class AgenciaInmobiliariaRestController {
 		RegistrarUsuarioDTO registrarUsuarioDTO = new RegistrarUsuarioDTO();
 
 		try {
-
-			if (registrarUsuarioRepository.findById(id).isPresent()) {
-				RegistrarUsuario usuario = registrarUsuarioRepository.findById(id).get();
+			Optional<RegistrarUsuario> registrarUser = registrarUsuarioRepository.findById(id);
+			if (registrarUser.isPresent()) {
+				RegistrarUsuario usuario = registrarUser.get();
 
 				registrarUsuarioDTO = convertRegistrarUsuario.convertToDTO(usuario);
 				response.put(Constantes.CODIGO_HTTP, "200");
@@ -234,10 +242,12 @@ public class AgenciaInmobiliariaRestController {
 	public Map<String, String> updateUser(@RequestBody RegistrarUsuarioDTO newUserDTO, @PathVariable Long id) {
 		Map<String, String> response = new HashMap<>();
 		try {
-
-			if (registrarUsuarioRepository.findById(id).isPresent()) {
+		
+			Optional<RegistrarUsuario> registrarUser = registrarUsuarioRepository.findById(id);
+			Optional<TipoIdentificacion> tipoDocExiste = tipoIdentificacionRepository.findById(newUserDTO.getTipoIdentificacionDTO().getId());
+			if (registrarUser.isPresent()&&tipoDocExiste.isPresent()) {
 				RegistrarUsuario newUser = convertRegistrarUsuario.convertToEntity(newUserDTO);
-				RegistrarUsuario user = registrarUsuarioRepository.findById(id).get();
+				RegistrarUsuario user = registrarUser.get();
 				user.setApellidos(newUser.getApellidos());
 				user.setNombres(newUser.getNombres());
 				user.setDireccion(newUser.getDireccion());
@@ -252,7 +262,7 @@ public class AgenciaInmobiliariaRestController {
 				return response;
 			} else {
 				response.put(Constantes.CODIGO_HTTP, "100");
-				response.put(Constantes.MENSAJE_EXITO, "El usuario no existe");
+				response.put(Constantes.MENSAJE_EXITO, "El usuario o tipo de documento no existe");
 
 			}
 
