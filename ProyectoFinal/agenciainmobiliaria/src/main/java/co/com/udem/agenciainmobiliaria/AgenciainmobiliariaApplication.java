@@ -8,6 +8,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import co.com.udem.agenciainmobiliaria.dto.TipoIdentificacionDTO;
+import co.com.udem.agenciainmobiliaria.util.ConvertPropiedad;
 import co.com.udem.agenciainmobiliaria.util.ConvertRegistrarUsuario;
 import co.com.udem.agenciainmobiliaria.util.ConvertTipoIdentificacion;
 
@@ -43,4 +44,8 @@ public class AgenciainmobiliariaApplication {
 		return new BCryptPasswordEncoder();
 	}
 
+	@Bean
+	public ConvertPropiedad convertPropiedad() {
+		return new ConvertPropiedad();
+	}
 }

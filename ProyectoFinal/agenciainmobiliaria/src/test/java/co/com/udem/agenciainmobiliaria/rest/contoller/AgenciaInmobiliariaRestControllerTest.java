@@ -21,6 +21,7 @@ import com.google.gson.Gson;
 import co.com.udem.agenciainmobiliaria.AgenciainmobiliariaApplication;
 import co.com.udem.agenciainmobiliaria.dto.AutenticationRequestDTO;
 import co.com.udem.agenciainmobiliaria.dto.AutenticationResponseDTO;
+import co.com.udem.agenciainmobiliaria.dto.PropiedadDTO;
 import co.com.udem.agenciainmobiliaria.dto.RegistrarUsuarioDTO;
 import co.com.udem.agenciainmobiliaria.dto.TipoIdentificacionDTO;
 
@@ -248,6 +249,97 @@ public class AgenciaInmobiliariaRestControllerTest {
 		ResponseEntity<String> postResponse = restTemplate.exchange(getRootUrl() + "/tiposDocumentos/3", HttpMethod.GET,
 				entity, String.class);
 		System.out.println("Datos testGetTipoDocumentoById: " + postResponse);
+		assertEquals(200, postResponse.getStatusCode().value());
+	}
+
+	@Test
+	public void adicionarPropiedadTest() {
+		PropiedadDTO propiedadDTO = new PropiedadDTO();
+		propiedadDTO.setArea("50m2");
+		propiedadDTO.setNumeroBanos(2);
+		propiedadDTO.setNumeroHabitaciones(3);
+		propiedadDTO.setTipoPropiedad("Arriendo");
+		propiedadDTO.setValor(100000);
+
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		System.out.println("El token adicionarPropiedadTest es: " + this.token);
+		headers.set("Authorization", "Bearer " + this.token);
+
+		HttpEntity<PropiedadDTO> entity = new HttpEntity<PropiedadDTO>(propiedadDTO, headers);
+		ResponseEntity<String> postResponse = restTemplate.exchange(
+				getRootUrl() + "/agenciaInmobiliaria/adicionarPropiedad", HttpMethod.POST, entity, String.class);
+
+		assertEquals(200, postResponse.getStatusCode().value());
+
+	}
+
+	@Test
+	public void updatePropiedadTest() {
+		int id = 1;
+		PropiedadDTO propiedadDTO = restTemplate.getForObject(getRootUrl() + "/propiedad/" + id, PropiedadDTO.class);
+
+		propiedadDTO.setArea("50m2");
+		propiedadDTO.setNumeroBanos(2);
+		propiedadDTO.setNumeroHabitaciones(2);
+		propiedadDTO.setTipoPropiedad("Arriendo");
+		propiedadDTO.setValor(100000);
+
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		System.out.println("El token updatePropiedadTest es: " + this.token);
+		headers.set("Authorization", "Bearer " + this.token);
+
+		HttpEntity<PropiedadDTO> entity = new HttpEntity<PropiedadDTO>(propiedadDTO, headers);
+		ResponseEntity<String> postResponse = restTemplate.exchange(getRootUrl() + "/propiedad/" + id, HttpMethod.PUT,
+				entity, String.class);
+
+		assertEquals(200, postResponse.getStatusCode().value());
+	}
+
+	@Test
+	public void testDeletePropiedad() {
+		int id = 5;
+
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		System.out.println("El token testDeletePropiedad es: " + this.token);
+		headers.set("Authorization", "Bearer " + this.token);
+
+		HttpEntity<String> entity = new HttpEntity<String>(null, headers);
+		ResponseEntity<String> postResponse = restTemplate.exchange(getRootUrl() + "/propiedad/" + id,
+				HttpMethod.DELETE, entity, String.class);
+		System.out.println("Datos testDeletePropiedad: " + postResponse);
+		assertEquals(200, postResponse.getStatusCode().value());
+	}
+
+	@Test
+	public void testGetAllPropiedad() {
+
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		System.out.println("El token testGetAllPropiedad es: " + this.token);
+		headers.set("Authorization", "Bearer " + this.token);
+
+		HttpEntity<String> entity = new HttpEntity<String>(null, headers);
+		ResponseEntity<String> postResponse = restTemplate.exchange(getRootUrl() + "/propiedades", HttpMethod.GET,
+				entity, String.class);
+		System.out.println("Datos testGetAllPropiedad: " + postResponse);
+		assertEquals(200, postResponse.getStatusCode().value());
+	}
+
+	@Test
+	public void testGetPropiedadById() {
+
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		System.out.println("El token testGetPropiedadById es: " + this.token);
+		headers.set("Authorization", "Bearer " + this.token);
+
+		HttpEntity<String> entity = new HttpEntity<String>(null, headers);
+		ResponseEntity<String> postResponse = restTemplate.exchange(getRootUrl() + "/propiedad/3", HttpMethod.GET,
+				entity, String.class);
+		System.out.println("Datos testGetPropiedadById: " + postResponse);
 		assertEquals(200, postResponse.getStatusCode().value());
 	}
 }

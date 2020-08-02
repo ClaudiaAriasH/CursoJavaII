@@ -17,13 +17,17 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import co.com.udem.agenciainmobiliaria.dto.PropiedadDTO;
 import co.com.udem.agenciainmobiliaria.dto.RegistrarUsuarioDTO;
 import co.com.udem.agenciainmobiliaria.dto.TipoIdentificacionDTO;
+import co.com.udem.agenciainmobiliaria.entities.Propiedad;
 import co.com.udem.agenciainmobiliaria.entities.RegistrarUsuario;
 import co.com.udem.agenciainmobiliaria.entities.TipoIdentificacion;
+import co.com.udem.agenciainmobiliaria.repositories.PropiedadRepository;
 import co.com.udem.agenciainmobiliaria.repositories.RegistrarUsuarioRepository;
 import co.com.udem.agenciainmobiliaria.repositories.TipoIdentificacionRepository;
 import co.com.udem.agenciainmobiliaria.util.Constantes;
+import co.com.udem.agenciainmobiliaria.util.ConvertPropiedad;
 import co.com.udem.agenciainmobiliaria.util.ConvertRegistrarUsuario;
 import co.com.udem.agenciainmobiliaria.util.ConvertTipoIdentificacion;
 
@@ -39,6 +43,12 @@ public class AgenciaInmobiliariaRestController {
 	private TipoIdentificacionRepository tipoIdentificacionRepository;
 	@Autowired
 	private ConvertTipoIdentificacion convertTipoIdentificacion;
+
+	@Autowired
+	private PropiedadRepository propiedadRepository;
+
+	@Autowired
+	private ConvertPropiedad convertPropiedad;
 
 	@PostMapping("/agenciaInmobiliaria/adicionarTipoDocumento")
 	public Map<String, String> adicionarTipoDocumento(@RequestBody TipoIdentificacionDTO tipoIdentificacionDTO) {
@@ -242,10 +252,11 @@ public class AgenciaInmobiliariaRestController {
 	public Map<String, String> updateUser(@RequestBody RegistrarUsuarioDTO newUserDTO, @PathVariable Long id) {
 		Map<String, String> response = new HashMap<>();
 		try {
-		
+
 			Optional<RegistrarUsuario> registrarUser = registrarUsuarioRepository.findById(id);
-			Optional<TipoIdentificacion> tipoDocExiste = tipoIdentificacionRepository.findById(newUserDTO.getTipoIdentificacionDTO().getId());
-			if (registrarUser.isPresent()&&tipoDocExiste.isPresent()) {
+			Optional<TipoIdentificacion> tipoDocExiste = tipoIdentificacionRepository
+					.findById(newUserDTO.getTipoIdentificacionDTO().getId());
+			if (registrarUser.isPresent() && tipoDocExiste.isPresent()) {
 				RegistrarUsuario newUser = convertRegistrarUsuario.convertToEntity(newUserDTO);
 				RegistrarUsuario user = registrarUser.get();
 				user.setApellidos(newUser.getApellidos());
@@ -276,4 +287,115 @@ public class AgenciaInmobiliariaRestController {
 
 	}
 
+	@PostMapping("/agenciaInmobiliaria/adicionarPropiedad")
+	public Map<String, String> adicionarPropiedad(@RequestBody PropiedadDTO propiedadDTO) {
+		Map<String, String> response = new HashMap<>();
+		try {
+			Propiedad propiedad = convertPropiedad.convertToEntity(propiedadDTO);
+
+			propiedadRepository.save(propiedad);
+			response.put(Constantes.CODIGO_HTTP, "200");
+			response.put(Constantes.MENSAJE_EXITO, "Se insertado la propiedad de forma exitosamente");
+
+			return response;
+		} catch (ParseException e) {
+			response.put(Constantes.CODIGO_HTTP, "500");
+			response.put(Constantes.MENSAJE_ERROR, "Fallo al adicionar la propiedad");
+			return response;
+		}
+
+	}
+
+	@GetMapping("/propiedades")
+	public List<PropiedadDTO> listarPropiedades() {
+
+		List<PropiedadDTO> propiedadDTO = null;
+		try {
+			Iterable<Propiedad> propiedades = propiedadRepository.findAll();
+			propiedadDTO = convertPropiedad.convertToDTOIterable(propiedades);
+
+		} catch (ParseException e) {
+			logger.error("Error al convertir la Propiedad en DTO");
+		}
+		return propiedadDTO;
+	}
+
+	@DeleteMapping("/propiedad/{id}")
+	public Map<String, String> eliminarPropiedad(@PathVariable Long id) {
+		Map<String, String> response = new HashMap<>();
+		if (propiedadRepository.findById(id).isPresent()) {
+			propiedadRepository.deleteById(id);
+			response.put(Constantes.CODIGO_HTTP, "200");
+			response.put(Constantes.MENSAJE_ERROR, "Registro de la propiedad eliminado de forma exitosa");
+			return response;
+		} else {
+			response.put(Constantes.CODIGO_HTTP, "100");
+			response.put(Constantes.MENSAJE_ERROR, "El registro de la propiedad no existe en la base de datos");
+		}
+		return response;
+	}
+
+	@GetMapping("/propiedad/{id}")
+	public Map<String, Object> buscarPropiedad(@PathVariable Long id) {
+		Map<String, Object> response = new HashMap<>();
+		PropiedadDTO propiedadDTO = new PropiedadDTO();
+
+		try {
+			Optional<Propiedad> propiedadOptional = propiedadRepository.findById(id);
+			if (propiedadOptional.isPresent()) {
+				Propiedad propiedad = propiedadOptional.get();
+
+				propiedadDTO = convertPropiedad.convertToDTO(propiedad);
+				response.put(Constantes.CODIGO_HTTP, "200");
+				response.put("datosPropiedad", propiedadDTO);
+				return response;
+			}
+
+			else {
+				response.put(Constantes.CODIGO_HTTP, "100");
+				response.put(Constantes.MENSAJE_EXITO, "La propiedad buscada no existe");
+			}
+
+		} catch (ParseException e) {
+			response.put(Constantes.CODIGO_HTTP, "500");
+			response.put(Constantes.MENSAJE_ERROR, "Fallo al buscar la propiedad");
+		}
+		return response;
+	}
+
+	@PutMapping("/propiedad/{id}")
+	public Map<String, String> updatePropiedad(@RequestBody PropiedadDTO newPropiedadDTO, @PathVariable Long id) {
+		Map<String, String> response = new HashMap<>();
+		try {
+			Optional<Propiedad> propiedad = propiedadRepository.findById(id);
+			if (propiedad.isPresent()) {
+
+				Propiedad newPropiedad = convertPropiedad.convertToEntity(newPropiedadDTO);
+
+				Propiedad propiedadAct = propiedad.get();
+
+				propiedadAct.setArea(newPropiedad.getArea());
+				propiedadAct.setNumeroHabitaciones(newPropiedad.getNumeroHabitaciones());
+				propiedadAct.setNumeroBanos(newPropiedad.getNumeroBanos());
+				propiedadAct.setTipoPropiedad(newPropiedad.getTipoPropiedad());
+				propiedadAct.setValor(newPropiedad.getValor());
+				propiedadRepository.save(propiedadAct);
+				response.put(Constantes.CODIGO_HTTP, "200");
+				response.put(Constantes.MENSAJE_EXITO, "Se actualizo la propiedad exitosamente");
+				return response;
+			} else {
+				response.put(Constantes.CODIGO_HTTP, "100");
+				response.put(Constantes.MENSAJE_EXITO, "La propiedad no existe");
+
+			}
+
+		} catch (ParseException e) {
+			response.put(Constantes.CODIGO_HTTP, "500");
+			response.put(Constantes.MENSAJE_ERROR, "Fallo al realizar la actualización de la propiedad");
+			return response;
+
+		}
+		return response;
+
+	}
 }
