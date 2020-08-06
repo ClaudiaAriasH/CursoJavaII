@@ -9,12 +9,15 @@ import java.util.Optional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import co.com.udem.agenciainmobiliaria.dto.PropiedadDTO;
@@ -23,6 +26,7 @@ import co.com.udem.agenciainmobiliaria.dto.TipoIdentificacionDTO;
 import co.com.udem.agenciainmobiliaria.entities.Propiedad;
 import co.com.udem.agenciainmobiliaria.entities.RegistrarUsuario;
 import co.com.udem.agenciainmobiliaria.entities.TipoIdentificacion;
+import co.com.udem.agenciainmobiliaria.filtros.FilterSpecification;
 import co.com.udem.agenciainmobiliaria.repositories.PropiedadRepository;
 import co.com.udem.agenciainmobiliaria.repositories.RegistrarUsuarioRepository;
 import co.com.udem.agenciainmobiliaria.repositories.TipoIdentificacionRepository;
@@ -398,4 +402,29 @@ public class AgenciaInmobiliariaRestController {
 		return response;
 
 	}
+
+	@GetMapping("/propiedad/")
+	@ResponseBody
+	public List<PropiedadDTO> buscarPropiedadFiltros(@RequestParam(value = "area", required = false) String area,
+			@RequestParam(value = "numeroHabitaciones", required = false) Integer numeroHabitaciones,
+			@RequestParam(value = "precio", required = false) Double precio) {
+
+		List<PropiedadDTO> propiedadDTO = null;
+		try {
+
+			List<Propiedad> movements = propiedadRepository
+					.findAll(Specification.where(FilterSpecification.withFilter(area, "area"))
+							.and(FilterSpecification.withFilter(numeroHabitaciones, "numeroHabitaciones"))
+							.and(FilterSpecification.withFilter(precio, "valor"))
+
+					);
+
+			propiedadDTO = convertPropiedad.convertToDTOIterable(movements);
+
+		} catch (ParseException e) {
+			logger.error("Error al convertir la Propiedad en DTO");
+		}
+		return propiedadDTO;
+	}
+
 }
