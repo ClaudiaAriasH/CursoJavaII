@@ -1,15 +1,37 @@
 package co.com.udem.agenciainmobiliaria.entities;
 
+import static java.util.stream.Collectors.toList;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
-@Entity
-public class RegistrarUsuario {
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Entity
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Data
+public class RegistrarUsuario implements UserDetails {
+
+	private static final long serialVersionUID = 1L;
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
@@ -20,29 +42,14 @@ public class RegistrarUsuario {
 	private String telefono;
 	private String email;
 	private String password;
-
+	
 	@ManyToOne
 	@JoinColumn(name = "tipo_iden", referencedColumnName = "id")
 	private TipoIdentificacion tipoIdentificacion;
 
-	public RegistrarUsuario() {
-		super();
-
-	}
-
-	public RegistrarUsuario(Long id, String nombres, String apellidos, String numeroIdentificacion, String direccion,
-			String telefono, String email, String password, TipoIdentificacion tipoIdentificacion) {
-		super();
-		this.id = id;
-		this.nombres = nombres;
-		this.apellidos = apellidos;
-		this.numeroIdentificacion = numeroIdentificacion;
-		this.direccion = direccion;
-		this.telefono = telefono;
-		this.email = email;
-		this.password = password;
-		this.tipoIdentificacion = tipoIdentificacion;
-	}
+	@ElementCollection(fetch = FetchType.EAGER)
+	@Builder.Default
+	private List<String> roles = new ArrayList<>();
 
 	public TipoIdentificacion getTipoIdentificacion() {
 		return tipoIdentificacion;
@@ -109,11 +116,51 @@ public class RegistrarUsuario {
 	}
 
 	public String getPassword() {
-		return password;
+		return this.password;
 	}
 
 	public void setPassword(String password) {
 		this.password = password;
 	}
 
+	@Override
+	public Collection<? extends GrantedAuthority> getAuthorities() {
+
+		return this.roles.stream().map(SimpleGrantedAuthority::new).collect(toList());
+	}
+	
+	public void setUsername(String numeroIdentificacion) {
+		this.numeroIdentificacion = numeroIdentificacion;
+	}
+
+	@Override
+	public String getUsername() {
+
+		return this.numeroIdentificacion;
+	}
+	
+
+	@Override
+	public boolean isAccountNonExpired() {
+
+		return true;
+	}
+
+	@Override
+	public boolean isAccountNonLocked() {
+
+		return true;
+	}
+
+	@Override
+	public boolean isCredentialsNonExpired() {
+
+		return true;
+	}
+
+	@Override
+	public boolean isEnabled() {
+
+		return true;
+	}
 }

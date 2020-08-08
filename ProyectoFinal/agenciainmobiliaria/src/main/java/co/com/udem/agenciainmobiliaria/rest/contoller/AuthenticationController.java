@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import co.com.udem.agenciainmobiliaria.dto.AuthenticationRequestDTO;
-import co.com.udem.agenciainmobiliaria.repositories.UserRepository;
+import co.com.udem.agenciainmobiliaria.repositories.RegistrarUsuarioRepository;
 import co.com.udem.agenciainmobiliaria.security.jwt.JwtTokenProvider;
 import co.com.udem.agenciainmobiliaria.util.Constantes;
 
@@ -30,7 +30,7 @@ public class AuthenticationController {
 	JwtTokenProvider jwtTokenProvider;
 
 	@Autowired
-	UserRepository users;
+	RegistrarUsuarioRepository users;
 
 	@PostMapping("/signin")
 	public Map<String, String> signin(@RequestBody AuthenticationRequestDTO data) {
@@ -38,7 +38,7 @@ public class AuthenticationController {
 		try {
 			String username = data.getUsername();
 			authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, data.getPassword()));
-			String token = jwtTokenProvider.createToken(username, this.users.findByUsername(username)
+			String token = jwtTokenProvider.createToken(username, this.users.findByNumeroIdentificacion(username)
 					.orElseThrow(() -> new UsernameNotFoundException("Usuario " + username + "no existe.")).getRoles());
 
 			response.put(Constantes.CODIGO_HTTP, "200");

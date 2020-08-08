@@ -1,6 +1,8 @@
 package co.com.udem.agenciainmobiliaria.rest.contoller;
 
 import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -8,9 +10,12 @@ import java.util.Optional;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.context.request.WebRequest;
 
 import co.com.udem.agenciainmobiliaria.dto.PropiedadDTO;
 import co.com.udem.agenciainmobiliaria.dto.RegistrarUsuarioDTO;
@@ -53,6 +59,9 @@ public class AgenciaInmobiliariaRestController {
 
 	@Autowired
 	private ConvertPropiedad convertPropiedad;
+
+	@Autowired
+	PasswordEncoder passwordEncoder;
 
 	@PostMapping("/agenciaInmobiliaria/adicionarTipoDocumento")
 	public Map<String, String> adicionarTipoDocumento(@RequestBody TipoIdentificacionDTO tipoIdentificacionDTO) {
@@ -103,7 +112,7 @@ public class AgenciaInmobiliariaRestController {
 			response.put(Constantes.MENSAJE_ERROR, "Registro eliminado de forma exitosa");
 			return response;
 		} else {
-			response.put(Constantes.CODIGO_HTTP, "100");
+			response.put(Constantes.CODIGO_HTTP, "404");
 			response.put(Constantes.MENSAJE_ERROR, "El registro no existe en la base de datos");
 		}
 		return response;
@@ -126,7 +135,7 @@ public class AgenciaInmobiliariaRestController {
 			}
 
 			else {
-				response.put(Constantes.CODIGO_HTTP, "100");
+				response.put(Constantes.CODIGO_HTTP, "404");
 				response.put(Constantes.MENSAJE_EXITO, "El tipo de documento buscado no existe");
 			}
 		} catch (ParseException e) {
@@ -155,7 +164,7 @@ public class AgenciaInmobiliariaRestController {
 				response.put(Constantes.MENSAJE_EXITO, "Se actualizo el Tipo de Documento exitosamente");
 				return response;
 			} else {
-				response.put(Constantes.CODIGO_HTTP, "100");
+				response.put(Constantes.CODIGO_HTTP, "404");
 				response.put(Constantes.MENSAJE_EXITO, "El tipo de documento no existe");
 
 			}
@@ -186,12 +195,20 @@ public class AgenciaInmobiliariaRestController {
 					response.put(Constantes.CODIGO_HTTP, "100");
 					response.put(Constantes.MENSAJE_EXITO, "El usuario ya existe");
 				} else {
-					registrarUsuarioRepository.save(registrarUsuario);
+
+					registrarUsuarioRepository.save(
+							RegistrarUsuario.builder().numeroIdentificacion(registrarUsuario.getNumeroIdentificacion())
+									.password(this.passwordEncoder.encode(registrarUsuario.getPassword()))
+									.roles(Arrays.asList("ROLE_USER")).apellidos(registrarUsuario.getApellidos())
+									.nombres(registrarUsuario.getNombres()).email(registrarUsuario.getEmail())
+									.telefono(registrarUsuario.getTelefono())
+									.tipoIdentificacion(registrarUsuario.getTipoIdentificacion())
+									.direccion(registrarUsuario.getDireccion()).build());
 					response.put(Constantes.CODIGO_HTTP, "200");
 					response.put(Constantes.MENSAJE_EXITO, "Registrado insertado exitosamente");
 				}
 			} else {
-				response.put(Constantes.CODIGO_HTTP, "100");
+				response.put(Constantes.CODIGO_HTTP, "404");
 				response.put(Constantes.MENSAJE_EXITO, "El tipo de documento no existe");
 			}
 			return response;
@@ -204,9 +221,32 @@ public class AgenciaInmobiliariaRestController {
 	}
 
 	@GetMapping("/usuarios")
-	public Iterable<RegistrarUsuario> listarUsuarios() {
+	public Map<String, Object> listarUsuarios() {
+		Map<String, Object> response = new HashMap<>();
+		Iterable<RegistrarUsuario> iRegistro = registrarUsuarioRepository.findAll();
+		List<RegistrarUsuario> listaRegistro = new ArrayList<>();
+		List<RegistrarUsuarioDTO> listaRegistroDTO = new ArrayList<>();
+		iRegistro.iterator().forEachRemaining(listaRegistro::add);
+		for (int i = 0; i < listaRegistro.size(); i++) {
+			try {
+				TipoIdentificacionDTO tipoIdentificacion = null;
+				if (listaRegistro.get(i).getTipoIdentificacion() != null) {
+					tipoIdentificacion = convertTipoIdentificacion
+							.convertToDTO(listaRegistro.get(i).getTipoIdentificacion());
+				}
+				RegistrarUsuarioDTO registroDTO = convertRegistrarUsuario.convertToDTO(listaRegistro.get(i));
+				registroDTO.setTipoIdentificacionDTO(tipoIdentificacion);
+				listaRegistroDTO.add(registroDTO);
+				response.put(Constantes.CODIGO_HTTP, "200");
+				response.put("datosUsuario", listaRegistroDTO);
+			} catch (ParseException e) {
+				response.put(Constantes.CODIGO_HTTP, "500");
+				response.put(Constantes.MENSAJE_ERROR, "Ocurrió un problema al listar los usuarios");
 
-		return registrarUsuarioRepository.findAll();
+			}
+		}
+
+		return response;
 	}
 
 	@DeleteMapping("/usuarios/{id}")
@@ -218,7 +258,7 @@ public class AgenciaInmobiliariaRestController {
 			response.put(Constantes.MENSAJE_ERROR, "Registro eliminado de forma exitosa");
 			return response;
 		} else {
-			response.put(Constantes.CODIGO_HTTP, "100");
+			response.put(Constantes.CODIGO_HTTP, "404");
 			response.put(Constantes.MENSAJE_ERROR, "El registro no existe en la base de datos");
 		}
 
@@ -235,13 +275,16 @@ public class AgenciaInmobiliariaRestController {
 			Optional<RegistrarUsuario> registrarUser = registrarUsuarioRepository.findById(id);
 			if (registrarUser.isPresent()) {
 				RegistrarUsuario usuario = registrarUser.get();
+				TipoIdentificacionDTO tipoDocDTO = convertTipoIdentificacion
+						.convertToDTO(usuario.getTipoIdentificacion());
 
 				registrarUsuarioDTO = convertRegistrarUsuario.convertToDTO(usuario);
+				registrarUsuarioDTO.setTipoIdentificacionDTO(tipoDocDTO);
 				response.put(Constantes.CODIGO_HTTP, "200");
 				response.put("datos", registrarUsuarioDTO);
 				return response;
 			} else {
-				response.put(Constantes.CODIGO_HTTP, "100");
+				response.put(Constantes.CODIGO_HTTP, "404");
 				response.put(Constantes.MENSAJE_EXITO, "El usuario no existe");
 			}
 
@@ -276,7 +319,7 @@ public class AgenciaInmobiliariaRestController {
 				response.put(Constantes.MENSAJE_EXITO, "Se actualizo el Usuario exitosamente");
 				return response;
 			} else {
-				response.put(Constantes.CODIGO_HTTP, "100");
+				response.put(Constantes.CODIGO_HTTP, "404");
 				response.put(Constantes.MENSAJE_EXITO, "El usuario o tipo de documento no existe");
 
 			}
@@ -333,7 +376,7 @@ public class AgenciaInmobiliariaRestController {
 			response.put(Constantes.MENSAJE_ERROR, "Registro de la propiedad eliminado de forma exitosa");
 			return response;
 		} else {
-			response.put(Constantes.CODIGO_HTTP, "100");
+			response.put(Constantes.CODIGO_HTTP, "404");
 			response.put(Constantes.MENSAJE_ERROR, "El registro de la propiedad no existe en la base de datos");
 		}
 		return response;
@@ -356,7 +399,7 @@ public class AgenciaInmobiliariaRestController {
 			}
 
 			else {
-				response.put(Constantes.CODIGO_HTTP, "100");
+				response.put(Constantes.CODIGO_HTTP, "404");
 				response.put(Constantes.MENSAJE_EXITO, "La propiedad buscada no existe");
 			}
 
@@ -388,7 +431,7 @@ public class AgenciaInmobiliariaRestController {
 				response.put(Constantes.MENSAJE_EXITO, "Se actualizo la propiedad exitosamente");
 				return response;
 			} else {
-				response.put(Constantes.CODIGO_HTTP, "100");
+				response.put(Constantes.CODIGO_HTTP, "404");
 				response.put(Constantes.MENSAJE_EXITO, "La propiedad no existe");
 
 			}
@@ -407,7 +450,8 @@ public class AgenciaInmobiliariaRestController {
 	@ResponseBody
 	public List<PropiedadDTO> buscarPropiedadFiltros(@RequestParam(value = "area", required = false) String area,
 			@RequestParam(value = "numeroHabitaciones", required = false) Integer numeroHabitaciones,
-			@RequestParam(value = "precio", required = false) Double precio) {
+			@RequestParam(value = "precioIni", required = false) Double precioIni,
+			@RequestParam(value = "precioFinal", required = false) Double precioFinal) {
 
 		List<PropiedadDTO> propiedadDTO = null;
 		try {
@@ -415,7 +459,7 @@ public class AgenciaInmobiliariaRestController {
 			List<Propiedad> movements = propiedadRepository
 					.findAll(Specification.where(FilterSpecification.withFilter(area, "area"))
 							.and(FilterSpecification.withFilter(numeroHabitaciones, "numeroHabitaciones"))
-							.and(FilterSpecification.withFilter(precio, "valor"))
+							.and(FilterSpecification.withFilterBetween(precioIni, precioFinal, "valor"))
 
 					);
 
@@ -425,6 +469,14 @@ public class AgenciaInmobiliariaRestController {
 			logger.error("Error al convertir la Propiedad en DTO");
 		}
 		return propiedadDTO;
+	}
+
+	@ExceptionHandler(value = { ConstraintViolationException.class })
+	public Map<String, String> handleConstraint(ConstraintViolationException ex, WebRequest request) {
+		Map<String, String> response = new HashMap<>();
+		response.put(Constantes.CODIGO_HTTP, "500");
+		response.put(Constantes.MENSAJE_ERROR, "El tipo de documento ingresado es incorrecto o no existe.");
+		return response;
 	}
 
 }

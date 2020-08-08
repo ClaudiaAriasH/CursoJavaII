@@ -45,9 +45,11 @@ public class AgenciaInmobiliariaRestControllerTest {
 
 	@Before
 	public void authorization() {
-		autenticationRequestDTO.setUsername("julio");
-		autenticationRequestDTO.setPassword("julio123**");
-		adicionarUsuario(autenticationRequestDTO);
+		
+		
+		autenticationRequestDTO.setUsername("10376410302");
+		autenticationRequestDTO.setPassword("pruebaToken");
+		adicionarUsuarioWebTest(autenticationRequestDTO);
 		ResponseEntity<String> postResponse = restTemplate.postForEntity(getRootUrl() + "/auth/signin",
 				autenticationRequestDTO, String.class);
 		Gson g = new Gson();
@@ -56,35 +58,30 @@ public class AgenciaInmobiliariaRestControllerTest {
 		token = autenticationResponseDTO.getToken();
 	}
 
-	private void adicionarUsuario(AutenticationRequestDTO autenticationRequestDTO) {
-		ResponseEntity<String> postResponse = restTemplate.postForEntity(getRootUrl() + "/users/addUser",
-				autenticationRequestDTO, String.class);
-		postResponse.getBody();
-	}
-
-	@Test
-	public void adicionarUsuarioWebTest() {
+//	private void adicionarUsuario(AutenticationRequestDTO autenticationRequestDTO) {
+//		ResponseEntity<String> postResponse = restTemplate.postForEntity(getRootUrl() + "/users/addUser",
+//				autenticationRequestDTO, String.class);
+//		postResponse.getBody();
+//	}
+//
+//	@Test
+	public void adicionarUsuarioWebTest(AutenticationRequestDTO autenticationRequestDTO) {
 		RegistrarUsuarioDTO registrarUsuarioDTO = new RegistrarUsuarioDTO();
 		registrarUsuarioDTO.setApellidos("Arias Hernandez");
 		registrarUsuarioDTO.setNombres("Claudia ");
 		registrarUsuarioDTO.setDireccion("Carrera 60 # 59-38");
 		registrarUsuarioDTO.setEmail("claarher@gmail.com");
-		registrarUsuarioDTO.setNumeroIdentificacion("392069245");
-		registrarUsuarioDTO.setPassword("Antioquia2020*");
+		registrarUsuarioDTO.setNumeroIdentificacion(autenticationRequestDTO.getUsername());
+		registrarUsuarioDTO.setPassword(autenticationRequestDTO.getPassword());
 		registrarUsuarioDTO.setTelefono("5982252");
 		TipoIdentificacionDTO tipoIdentificacionDTO = new TipoIdentificacionDTO();
 		tipoIdentificacionDTO.setId(6L);
 		tipoIdentificacionDTO.setTipoDocumento("CC");
 		tipoIdentificacionDTO.setDescripcion("Cédula de Ciudadanía");
 		registrarUsuarioDTO.setTipoIdentificacionDTO(tipoIdentificacionDTO);
-		HttpHeaders headers = new HttpHeaders();
-		headers.setContentType(MediaType.APPLICATION_JSON);
-		System.out.println("El token adicionarUsuarioWebTest es: " + this.token);
-		headers.set("Authorization", "Bearer " + this.token);
-
-		HttpEntity<RegistrarUsuarioDTO> entity = new HttpEntity<RegistrarUsuarioDTO>(registrarUsuarioDTO, headers);
-		ResponseEntity<String> postResponse = restTemplate.exchange(
-				getRootUrl() + "/agenciaInmobiliaria/adicionarUsuario", HttpMethod.POST, entity, String.class);
+		ResponseEntity<RegistrarUsuarioDTO> postResponse = restTemplate.postForEntity(
+				getRootUrl() + "/agenciaInmobiliaria/adicionarUsuario", registrarUsuarioDTO, RegistrarUsuarioDTO.class);
+		postResponse.getBody();
 
 		assertEquals(200, postResponse.getStatusCode().value());
 
@@ -114,7 +111,6 @@ public class AgenciaInmobiliariaRestControllerTest {
 		HttpEntity<RegistrarUsuarioDTO> entity = new HttpEntity<RegistrarUsuarioDTO>(registrarUsuarioDTO, headers);
 		ResponseEntity<String> postResponse = restTemplate.exchange(getRootUrl() + "/usuarios/" + id, HttpMethod.PUT,
 				entity, String.class);
-
 		assertEquals(200, postResponse.getStatusCode().value());
 	}
 
@@ -158,7 +154,7 @@ public class AgenciaInmobiliariaRestControllerTest {
 		headers.set("Authorization", "Bearer " + this.token);
 
 		HttpEntity<String> entity = new HttpEntity<String>(null, headers);
-		ResponseEntity<String> postResponse = restTemplate.exchange(getRootUrl() + "/usuarios/3", HttpMethod.GET,
+		ResponseEntity<String> postResponse = restTemplate.exchange(getRootUrl() + "/usuarios/19", HttpMethod.GET,
 				entity, String.class);
 		System.out.println("Datos testGetUsuarioById: " + postResponse);
 		assertEquals(200, postResponse.getStatusCode().value());
@@ -328,6 +324,7 @@ public class AgenciaInmobiliariaRestControllerTest {
 		assertEquals(200, postResponse.getStatusCode().value());
 	}
 
+	
 	@Test
 	public void testGetPropiedadById() {
 

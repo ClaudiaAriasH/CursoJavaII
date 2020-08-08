@@ -31,7 +31,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		http.httpBasic().disable().csrf().disable().sessionManagement()
 				.sessionCreationPolicy(SessionCreationPolicy.STATELESS).and().authorizeRequests()
 				.antMatchers("/auth/signin").permitAll()				
-				.antMatchers(HttpMethod.POST, "/users/addUser**").permitAll()				
+				.antMatchers(HttpMethod.POST, "/agenciaInmobiliaria/adicionarUsuario**").permitAll()				
 				.anyRequest().authenticated().and()
 				.apply(new JwtSecurityConfigurer(jwtTokenProvider));
 		
