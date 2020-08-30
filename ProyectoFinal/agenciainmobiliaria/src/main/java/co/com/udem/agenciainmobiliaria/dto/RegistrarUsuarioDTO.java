@@ -1,7 +1,13 @@
 package co.com.udem.agenciainmobiliaria.dto;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 
+import lombok.AllArgsConstructor;
+
+@AllArgsConstructor
 public class RegistrarUsuarioDTO {
 
 	private Long id;
@@ -16,23 +22,19 @@ public class RegistrarUsuarioDTO {
 	@Autowired
 	private TipoIdentificacionDTO tipoIdentificacionDTO;
 
+	private List<String> roles = new ArrayList<>();
+
 	public RegistrarUsuarioDTO() {
 		super();
 
 	}
 
-	public RegistrarUsuarioDTO(Long id, String nombres, String apellidos, String numeroIdentificacion, String direccion,
-			String telefono, String email, String password, TipoIdentificacionDTO tipoIdentificacionDTO) {
-		super();
-		this.id = id;
-		this.nombres = nombres;
-		this.apellidos = apellidos;
-		this.numeroIdentificacion = numeroIdentificacion;
-		this.direccion = direccion;
-		this.telefono = telefono;
-		this.email = email;
-		this.password = password;
-		this.tipoIdentificacionDTO = tipoIdentificacionDTO;
+	public List<String> getRoles() {
+		return roles;
+	}
+
+	public void setRoles(List<String> roles) {
+		this.roles = roles;
 	}
 
 	public TipoIdentificacionDTO getTipoIdentificacionDTO() {

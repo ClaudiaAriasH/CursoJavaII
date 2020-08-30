@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -14,10 +15,13 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -42,10 +46,15 @@ public class RegistrarUsuario implements UserDetails {
 	private String telefono;
 	private String email;
 	private String password;
-	
+
+	@JsonBackReference
 	@ManyToOne
 	@JoinColumn(name = "tipo_iden", referencedColumnName = "id")
 	private TipoIdentificacion tipoIdentificacion;
+
+	@JsonBackReference
+	@OneToMany(mappedBy = "registrarUsuario", cascade = CascadeType.REMOVE)
+	private Collection<Propiedad> propiedad;
 
 	@ElementCollection(fetch = FetchType.EAGER)
 	@Builder.Default
@@ -128,7 +137,7 @@ public class RegistrarUsuario implements UserDetails {
 
 		return this.roles.stream().map(SimpleGrantedAuthority::new).collect(toList());
 	}
-	
+
 	public void setUsername(String numeroIdentificacion) {
 		this.numeroIdentificacion = numeroIdentificacion;
 	}
@@ -138,7 +147,6 @@ public class RegistrarUsuario implements UserDetails {
 
 		return this.numeroIdentificacion;
 	}
-	
 
 	@Override
 	public boolean isAccountNonExpired() {

@@ -1,5 +1,7 @@
 package co.com.udem.agenciainmobiliaria.dto;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 public class PropiedadDTO {
 
 	private Long id;
@@ -9,13 +11,16 @@ public class PropiedadDTO {
 	private String tipoPropiedad;
 	private double valor;
 
+	@Autowired
+	private RegistrarUsuarioDTO registrarUsuarioDTO;
+
 	public PropiedadDTO() {
 		super();
 
 	}
 
 	public PropiedadDTO(Long id, String area, int numeroHabitaciones, int numeroBanos, String tipoPropiedad,
-			double valor) {
+			double valor, RegistrarUsuarioDTO registrarUsuarioDTO) {
 		super();
 		this.id = id;
 		this.area = area;
@@ -23,6 +28,15 @@ public class PropiedadDTO {
 		this.numeroBanos = numeroBanos;
 		this.tipoPropiedad = tipoPropiedad;
 		this.valor = valor;
+		this.registrarUsuarioDTO = registrarUsuarioDTO;
+	}
+
+	public RegistrarUsuarioDTO getRegistrarUsuarioDTO() {
+		return registrarUsuarioDTO;
+	}
+
+	public void setRegistrarUsuarioDTO(RegistrarUsuarioDTO registrarUsuarioDTO) {
+		this.registrarUsuarioDTO = registrarUsuarioDTO;
 	}
 
 	public Long getId() {
